@@ -7,12 +7,14 @@ import 'package:youtube_mp3/models/models.dart';
 
 class VideoDescriptionDialog extends StatelessWidget {
   final DownloadAudioModel downloadAudioModel;
-  final Function(DownloadAudioModel) downloadAction;
+  final Function(DownloadAudioModel)? downloadAction;
+  final bool showDownloadButton;
 
   const VideoDescriptionDialog({
     Key? key,
     required this.downloadAudioModel,
     required this.downloadAction,
+    this.showDownloadButton = true,
   }) : super(key: key);
 
   @override
@@ -95,22 +97,24 @@ class VideoDescriptionDialog extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                Get.back();
+            if (showDownloadButton) ...[
+              const SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: () {
+                  Get.back();
 
-                downloadAction(downloadAudioModel);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  FaIcon(FontAwesomeIcons.arrowCircleDown, size: 20.0),
-                  SizedBox(width: 10.0),
-                  Text('Download Mp3'),
-                ],
-              ),
-            ),
+                  downloadAction!(downloadAudioModel);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    FaIcon(FontAwesomeIcons.arrowCircleDown, size: 20.0),
+                    SizedBox(width: 10.0),
+                    Text('Download Mp3'),
+                  ],
+                ),
+              )
+            ],
           ],
         ),
       ),

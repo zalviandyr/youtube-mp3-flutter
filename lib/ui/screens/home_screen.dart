@@ -58,7 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
         .add(DownloadAudioSubmit(downloadAudioModel: downloadAudioModel));
   }
 
-  void _showVideoDescriptionDialog(DownloadAudioModel downloadAudioModel) {
+  void _showVideoDescriptionDialog(
+      DownloadAudioModel downloadAudioModel, bool showDownloadButton) {
     showGeneralDialog(
       context: context,
       barrierLabel: 'VideoDescriptionDialog',
@@ -72,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: VideoDescriptionDialog(
               downloadAudioModel: downloadAudioModel,
               downloadAction: _downloadAction,
+              showDownloadButton: showDownloadButton,
             ),
           ),
         );
@@ -82,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _youtubeLinkListener(BuildContext context, YoutubeLinkState state) {
     if (state is YoutubeLinkSearchSuccess) {
-      _showVideoDescriptionDialog(state.downloadAudioModel);
+      _showVideoDescriptionDialog(state.downloadAudioModel, true);
     }
   }
 
@@ -195,7 +197,11 @@ class _HomeScreenState extends State<HomeScreen> {
         curve: Curves.easeIn,
         reverseCurve: Curves.easeOut,
       )),
-      child: DownloadItem(downloadAudioModel: downloadAudioModel),
+      child: DownloadItem(
+        downloadAudioModel: downloadAudioModel,
+        onTap: (downloadAudioModel) =>
+            _showVideoDescriptionDialog(downloadAudioModel, false),
+      ),
     );
   }
 }
