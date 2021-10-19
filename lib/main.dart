@@ -4,15 +4,16 @@ import 'dart:io';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:youtube_mp3/screens/screens.dart';
+import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/ui/screens/screens.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+// TODO: add home screen tutorial
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -20,46 +21,56 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      builder: () => GetMaterialApp(
-        title: 'Youtube Mp3',
-        theme: ThemeData(
-          fontFamily: 'JosefinSans',
-          scaffoldBackgroundColor: const Color(0xFFF3F2F3),
-          colorScheme: const ColorScheme.light(
-            primary: Color(0xFFEE6C4D),
-            secondary: Color(0xFF98C1D9),
-          ),
-          textTheme: TextTheme(
-            subtitle1: TextStyle(
-              fontSize: 16.sp,
+      builder: () => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => YoutubeLinkBloc()),
+          BlocProvider(create: (_) => DownloadAudioBloc()),
+        ],
+        child: GetMaterialApp(
+          title: 'Youtube Mp3',
+          theme: ThemeData(
+            fontFamily: 'JosefinSans',
+            scaffoldBackgroundColor: const Color(0xFFF3F2F3),
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFEE6C4D),
+              secondary: Color(0xFF98C1D9),
             ),
-            bodyText1: TextStyle(
-              fontSize: 16.sp,
+            textTheme: TextTheme(
+              headline6: TextStyle(
+                fontSize: 20.sp,
+              ),
+              // TextForm style
+              subtitle1: TextStyle(
+                fontSize: 16.sp,
+              ),
+              bodyText1: TextStyle(
+                fontSize: 16.sp,
+              ),
+              bodyText2: TextStyle(
+                fontSize: 14.sp,
+              ),
             ),
-            bodyText2: TextStyle(
-              fontSize: 14.sp,
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                ),
+              ),
             ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
+            inputDecorationTheme: InputDecorationTheme(
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 13.0,
+                horizontal: 7.0,
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade200,
+              border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(7.0),
               ),
             ),
           ),
-          inputDecorationTheme: InputDecorationTheme(
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 13.0,
-              horizontal: 7.0,
-            ),
-            filled: true,
-            fillColor: Colors.grey.shade200,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-            ),
-          ),
+          home: const NavigationScreen(),
         ),
-        home: const NavigationScreen(),
       ),
     );
   }
