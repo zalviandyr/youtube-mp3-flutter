@@ -14,7 +14,9 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
 
         listDownloadAudio.add(event.downloadAudio);
 
-        emit(DownloadAudioProgress(listDownloadAudio: listDownloadAudio));
+        emit(DownloadAudioProgress(
+          listDownloadAudio: listDownloadAudio.toSet().toList(),
+        ));
       } catch (err) {
         log(err.toString(), name: 'DownloadAudioBloc');
 
