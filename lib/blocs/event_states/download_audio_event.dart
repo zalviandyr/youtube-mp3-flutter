@@ -6,7 +6,7 @@ abstract class DownloadAudioEvent extends Equatable {
 }
 
 class DownloadAudioSubmit extends DownloadAudioEvent {
-  final DownloadAudio downloadAudio;
+  final DownloadAudioModel downloadAudio;
 
   const DownloadAudioSubmit({required this.downloadAudio});
 

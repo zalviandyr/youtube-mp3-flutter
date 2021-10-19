@@ -26,9 +26,9 @@ class YoutubeLinkBloc extends Bloc<YoutubeLinkEvent, YoutubeLinkState> {
         String second = twoDigits(video.duration?.inSeconds.remainder(60));
 
         emit(YoutubeLinkSearchSuccess(
-          downloadAudio: DownloadAudio(
+          downloadAudio: DownloadAudioModel(
             id: video.id.value,
-            thumb: video.thumbnails.maxResUrl,
+            thumbnails: video.thumbnails,
             title: video.title,
             duration: minute + ':' + second,
             size: audio.size.totalMegaBytes.toStringAsFixed(2),

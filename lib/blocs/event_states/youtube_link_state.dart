@@ -21,7 +21,7 @@ class YoutubeLinkError extends YoutubeLinkState {
 }
 
 class YoutubeLinkSearchSuccess extends YoutubeLinkState {
-  final DownloadAudio downloadAudio;
+  final DownloadAudioModel downloadAudio;
 
   const YoutubeLinkSearchSuccess({required this.downloadAudio});
 

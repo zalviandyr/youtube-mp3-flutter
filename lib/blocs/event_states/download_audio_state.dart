@@ -21,7 +21,7 @@ class DownloadAudioError extends DownloadAudioState {
 }
 
 class DownloadAudioProgress extends DownloadAudioState {
-  final List<DownloadAudio> listDownloadAudio;
+  final List<DownloadAudioModel> listDownloadAudio;
 
   const DownloadAudioProgress({required this.listDownloadAudio});
 

@@ -6,8 +6,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:youtube_mp3/models/models.dart';
 
 class VideoDescriptionDialog extends StatelessWidget {
-  final DownloadAudio downloadAudio;
-  final Function(DownloadAudio) downloadAction;
+  final DownloadAudioModel downloadAudio;
+  final Function(DownloadAudioModel) downloadAction;
 
   const VideoDescriptionDialog({
     Key? key,
@@ -26,24 +26,43 @@ class VideoDescriptionDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(7.0),
-              child: CachedNetworkImage(
-                width: 130.0,
-                height: 100.0,
-                imageUrl: downloadAudio.thumb,
-                fit: BoxFit.cover,
-                placeholder: (context, url) {
-                  return Shimmer.fromColors(
-                    baseColor: Colors.grey.shade300,
-                    highlightColor: Colors.grey.shade200,
-                    child: Container(
-                      width: 130.0,
-                      height: 100.0,
+            CachedNetworkImage(
+              width: 180.0,
+              height: 110.0,
+              imageUrl: downloadAudio.thumbnails.maxResUrl,
+              fit: BoxFit.cover,
+              imageBuilder: (context, imageProvider) => ClipRRect(
+                borderRadius: BorderRadius.circular(7.0),
+                child: Image(
+                  image: imageProvider,
+                  width: 180.0,
+                  height: 110.0,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              placeholder: (context, url) {
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade200,
+                  child: Container(
+                    width: 180.0,
+                    height: 110.0,
+                    decoration: BoxDecoration(
                       color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(7.0),
                     ),
-                  );
-                },
+                  ),
+                );
+              },
+              // handle when maxRes not available
+              errorWidget: (context, url, error) => ClipRRect(
+                borderRadius: BorderRadius.circular(7.0),
+                child: Image.network(
+                  downloadAudio.thumbnails.mediumResUrl,
+                  width: 180.0,
+                  height: 110.0,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(height: 12.0),

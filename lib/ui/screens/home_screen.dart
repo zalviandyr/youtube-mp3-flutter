@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
@@ -51,11 +50,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _downloadAction(DownloadAudio downloadAudio) {
+  void _downloadAction(DownloadAudioModel downloadAudio) {
+    _linkController.text = '';
+
     _downloadAudioBloc.add(DownloadAudioSubmit(downloadAudio: downloadAudio));
   }
 
-  void _showVideoDescriptionDialog(DownloadAudio downloadAudio) {
+  void _showVideoDescriptionDialog(DownloadAudioModel downloadAudio) {
     showGeneralDialog(
       context: context,
       barrierLabel: 'VideoDescriptionDialog',

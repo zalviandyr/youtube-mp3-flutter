@@ -1,15 +1,16 @@
 import 'package:equatable/equatable.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-class DownloadAudio extends Equatable {
+class DownloadAudioModel extends Equatable {
   final String id;
-  final String thumb;
+  final ThumbnailSet thumbnails;
   final String title;
   final String duration;
   final String size;
 
-  const DownloadAudio({
+  const DownloadAudioModel({
     required this.id,
-    required this.thumb,
+    required this.thumbnails,
     required this.title,
     required this.duration,
     required this.size,

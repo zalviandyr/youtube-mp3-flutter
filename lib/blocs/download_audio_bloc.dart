@@ -5,7 +5,7 @@ import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
 
 class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
-  final List<DownloadAudio> listDownloadAudio = [];
+  final List<DownloadAudioModel> listDownloadAudio = [];
 
   DownloadAudioBloc() : super(DownloadAudioUninitialized()) {
     on<DownloadAudioSubmit>((event, emit) {
