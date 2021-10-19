@@ -6,12 +6,12 @@ import 'package:shimmer/shimmer.dart';
 import 'package:youtube_mp3/models/models.dart';
 
 class VideoDescriptionDialog extends StatelessWidget {
-  final DownloadAudioModel downloadAudio;
+  final DownloadAudioModel downloadAudioModel;
   final Function(DownloadAudioModel) downloadAction;
 
   const VideoDescriptionDialog({
     Key? key,
-    required this.downloadAudio,
+    required this.downloadAudioModel,
     required this.downloadAction,
   }) : super(key: key);
 
@@ -27,10 +27,8 @@ class VideoDescriptionDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             CachedNetworkImage(
-              width: 180.0,
-              height: 110.0,
-              imageUrl: downloadAudio.thumbnails.maxResUrl,
               fit: BoxFit.cover,
+              imageUrl: downloadAudioModel.thumbnails.maxResUrl,
               imageBuilder: (context, imageProvider) => ClipRRect(
                 borderRadius: BorderRadius.circular(7.0),
                 child: Image(
@@ -40,25 +38,23 @@ class VideoDescriptionDialog extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              placeholder: (context, url) {
-                return Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade200,
-                  child: Container(
-                    width: 180.0,
-                    height: 110.0,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(7.0),
-                    ),
+              placeholder: (context, url) => Shimmer.fromColors(
+                baseColor: Colors.grey.shade300,
+                highlightColor: Colors.grey.shade200,
+                child: Container(
+                  width: 180.0,
+                  height: 110.0,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(7.0),
                   ),
-                );
-              },
+                ),
+              ),
               // handle when maxRes not available
               errorWidget: (context, url, error) => ClipRRect(
                 borderRadius: BorderRadius.circular(7.0),
                 child: Image.network(
-                  downloadAudio.thumbnails.mediumResUrl,
+                  downloadAudioModel.thumbnails.mediumResUrl,
                   width: 180.0,
                   height: 110.0,
                   fit: BoxFit.cover,
@@ -67,7 +63,7 @@ class VideoDescriptionDialog extends StatelessWidget {
             ),
             const SizedBox(height: 12.0),
             Text(
-              downloadAudio.title,
+              downloadAudioModel.title,
               style: Theme.of(context).textTheme.headline6,
               textAlign: TextAlign.center,
             ),
@@ -81,7 +77,7 @@ class VideoDescriptionDialog extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 7,
-                  child: Text(downloadAudio.duration),
+                  child: Text(downloadAudioModel.duration),
                 ),
               ],
             ),
@@ -95,7 +91,7 @@ class VideoDescriptionDialog extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 7,
-                  child: Text('${downloadAudio.size} mb'),
+                  child: Text('${downloadAudioModel.size} mb'),
                 ),
               ],
             ),
@@ -104,7 +100,7 @@ class VideoDescriptionDialog extends StatelessWidget {
               onPressed: () {
                 Get.back();
 
-                downloadAction(downloadAudio);
+                downloadAction(downloadAudioModel);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -21,10 +21,10 @@ class YoutubeLinkError extends YoutubeLinkState {
 }
 
 class YoutubeLinkSearchSuccess extends YoutubeLinkState {
-  final DownloadAudioModel downloadAudio;
+  final DownloadAudioModel downloadAudioModel;
 
-  const YoutubeLinkSearchSuccess({required this.downloadAudio});
+  const YoutubeLinkSearchSuccess({required this.downloadAudioModel});
 
   @override
-  List<Object?> get props => [downloadAudio];
+  List<Object?> get props => [downloadAudioModel];
 }

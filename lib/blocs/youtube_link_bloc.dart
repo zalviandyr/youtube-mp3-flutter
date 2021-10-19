@@ -22,15 +22,16 @@ class YoutubeLinkBloc extends Bloc<YoutubeLinkEvent, YoutubeLinkState> {
         yt.close();
 
         String twoDigits(int? n) => n?.toString().padLeft(2, '0') ?? '00';
+        String hour = twoDigits(video.duration?.inHours);
         String minute = twoDigits(video.duration?.inMinutes.remainder(60));
         String second = twoDigits(video.duration?.inSeconds.remainder(60));
 
         emit(YoutubeLinkSearchSuccess(
-          downloadAudio: DownloadAudioModel(
+          downloadAudioModel: DownloadAudioModel(
             id: video.id.value,
             thumbnails: video.thumbnails,
             title: video.title,
-            duration: minute + ':' + second,
+            duration: hour + ':' + minute + ':' + second,
             size: audio.size.totalMegaBytes.toStringAsFixed(2),
           ),
         ));

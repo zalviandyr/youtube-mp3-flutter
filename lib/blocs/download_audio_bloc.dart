@@ -12,7 +12,7 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
       try {
         emit(DownloadAudioLoading());
 
-        listDownloadAudio.add(event.downloadAudio);
+        listDownloadAudio.add(event.downloadAudioModel);
 
         emit(DownloadAudioProgress(
           listDownloadAudio: listDownloadAudio.toSet().toList(),

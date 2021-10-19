@@ -6,10 +6,10 @@ abstract class DownloadAudioEvent extends Equatable {
 }
 
 class DownloadAudioSubmit extends DownloadAudioEvent {
-  final DownloadAudioModel downloadAudio;
+  final DownloadAudioModel downloadAudioModel;
 
-  const DownloadAudioSubmit({required this.downloadAudio});
+  const DownloadAudioSubmit({required this.downloadAudioModel});
 
   @override
-  List<Object?> get props => [downloadAudio];
+  List<Object?> get props => [downloadAudioModel];
 }

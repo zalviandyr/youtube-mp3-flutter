@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _linkController = TextEditingController();
+  final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey();
   late YoutubeLinkBloc _youtubeLinkBloc;
   late DownloadAudioBloc _downloadAudioBloc;
 
@@ -50,13 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _downloadAction(DownloadAudioModel downloadAudio) {
+  void _downloadAction(DownloadAudioModel downloadAudioModel) {
     _linkController.text = '';
 
-    _downloadAudioBloc.add(DownloadAudioSubmit(downloadAudio: downloadAudio));
+    _downloadAudioBloc
+        .add(DownloadAudioSubmit(downloadAudioModel: downloadAudioModel));
   }
 
-  void _showVideoDescriptionDialog(DownloadAudioModel downloadAudio) {
+  void _showVideoDescriptionDialog(DownloadAudioModel downloadAudioModel) {
     showGeneralDialog(
       context: context,
       barrierLabel: 'VideoDescriptionDialog',
@@ -68,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Opacity(
             opacity: a1.value,
             child: VideoDescriptionDialog(
-              downloadAudio: downloadAudio,
+              downloadAudioModel: downloadAudioModel,
               downloadAction: _downloadAction,
             ),
           ),
@@ -80,54 +82,68 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _youtubeLinkListener(BuildContext context, YoutubeLinkState state) {
     if (state is YoutubeLinkSearchSuccess) {
-      _showVideoDescriptionDialog(state.downloadAudio);
+      _showVideoDescriptionDialog(state.downloadAudioModel);
+    }
+  }
+
+  void _downloadAudioListener(BuildContext context, DownloadAudioState state) {
+    if (state is DownloadAudioProgress) {
+      _listKey.currentState!
+          .insertItem(0, duration: const Duration(milliseconds: 500));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  top: kToolbarHeight, left: 10.0, right: 10.0),
-              child: searchYoutubeBar(),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<YoutubeLinkBloc, YoutubeLinkState>(
+            listener: _youtubeLinkListener),
+        BlocListener<DownloadAudioBloc, DownloadAudioState>(
+            listener: _downloadAudioListener),
+      ],
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: kToolbarHeight, left: 10.0, right: 10.0),
+                child: _buildSearchYoutubeBar(),
+              ),
             ),
-          ),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(top: 22.0, left: 10.0, right: 10.0),
-              child: Text('Download progress'),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 22.0, left: 10.0, right: 10.0),
+                child: Text('Download progress'),
+              ),
             ),
-          ),
-          BlocBuilder<DownloadAudioBloc, DownloadAudioState>(
-            builder: (context, state) {
-              return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+            BlocBuilder<DownloadAudioBloc, DownloadAudioState>(
+              builder: (context, state) {
+                return SliverAnimatedList(
+                  key: _listKey,
+                  itemBuilder: (context, index, animation) {
                     if (state is DownloadAudioProgress) {
-                      return const DownloadItem();
+                      DownloadAudioModel downloadAudioModel =
+                          state.listDownloadAudio[index];
+
+                      return _buildSlidingItem(
+                          context, downloadAudioModel, animation);
                     }
 
-                    return const DownloadItem();
+                    return const SizedBox.shrink();
                   },
-                  childCount: state is DownloadAudioProgress
-                      ? state.listDownloadAudio.length
-                      : 0,
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget searchYoutubeBar() {
-    return BlocConsumer<YoutubeLinkBloc, YoutubeLinkState>(
-      listener: _youtubeLinkListener,
+  Widget _buildSearchYoutubeBar() {
+    return BlocBuilder<YoutubeLinkBloc, YoutubeLinkState>(
       builder: (context, state) {
         return Row(
           children: [
@@ -165,6 +181,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSlidingItem(BuildContext context,
+      DownloadAudioModel downloadAudioModel, Animation<double> animation) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(-1, 0),
+        end: const Offset(0, 0),
+      ).animate(CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut,
+      )),
+      child: DownloadItem(downloadAudioModel: downloadAudioModel),
     );
   }
 }
