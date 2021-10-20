@@ -36,19 +36,12 @@ class MyApp extends StatelessWidget {
               secondary: Color(0xFF98C1D9),
             ),
             textTheme: TextTheme(
-              headline6: TextStyle(
-                fontSize: 20.sp,
-              ),
+              headline6: TextStyle(fontSize: 20.sp),
               // TextForm style
-              subtitle1: TextStyle(
-                fontSize: 16.sp,
-              ),
-              bodyText1: TextStyle(
-                fontSize: 16.sp,
-              ),
-              bodyText2: TextStyle(
-                fontSize: 14.sp,
-              ),
+              subtitle1: TextStyle(fontSize: 16.sp),
+              bodyText1: TextStyle(fontSize: 16.sp),
+              bodyText2: TextStyle(fontSize: 14.sp),
+              button: TextStyle(fontSize: 14.sp),
             ),
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(

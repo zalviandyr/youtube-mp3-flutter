@@ -10,15 +10,46 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
   DownloadAudioBloc() : super(DownloadAudioUninitialized()) {
     on<DownloadAudioSubmit>((event, emit) {
       try {
-        emit(DownloadAudioLoading());
+        // prevent duplicate item when insert into first list
+        bool isExist = false;
+        for (DownloadAudioModel item in listDownloadAudio) {
+          if (item == event.downloadAudioModel) {
+            isExist = true;
+            break;
+          }
+        }
 
-        listDownloadAudio.add(event.downloadAudioModel);
+        if (!isExist) {
+          listDownloadAudio.insert(0, event.downloadAudioModel);
+        }
 
         emit(DownloadAudioProgress(
-          listDownloadAudio: listDownloadAudio.toSet().toList(),
+          listDownloadAudio: listDownloadAudio,
+          index: 0,
+          insertElement: event.downloadAudioModel,
+          removeElement: null,
         ));
       } catch (err) {
-        log(err.toString(), name: 'DownloadAudioBloc');
+        log(err.toString(), name: 'DownloadAudioSubmit');
+
+        emit(DownloadAudioError());
+      }
+    });
+
+    on<DownloadAudioCancel>((event, emit) {
+      try {
+        int index = listDownloadAudio
+            .indexWhere((elm) => elm == event.downloadAudioModel);
+        listDownloadAudio.removeAt(index);
+
+        emit(DownloadAudioProgress(
+          listDownloadAudio: listDownloadAudio,
+          index: index,
+          insertElement: null,
+          removeElement: event.downloadAudioModel,
+        ));
+      } catch (err) {
+        log(err.toString(), name: 'DownloadAudioCancel');
 
         emit(DownloadAudioError());
       }

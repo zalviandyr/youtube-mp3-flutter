@@ -22,9 +22,18 @@ class DownloadAudioError extends DownloadAudioState {
 
 class DownloadAudioProgress extends DownloadAudioState {
   final List<DownloadAudioModel> listDownloadAudio;
+  final int index; // where to insert or remove
+  final DownloadAudioModel? insertElement;
+  final DownloadAudioModel? removeElement;
 
-  const DownloadAudioProgress({required this.listDownloadAudio});
+  const DownloadAudioProgress({
+    required this.listDownloadAudio,
+    required this.index,
+    required this.insertElement,
+    required this.removeElement,
+  });
 
   @override
-  List<Object?> get props => [listDownloadAudio];
+  List<Object?> get props =>
+      [listDownloadAudio, index, insertElement, removeElement];
 }
