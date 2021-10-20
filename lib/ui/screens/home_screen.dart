@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
 import 'package:youtube_mp3/ui/widgets/widgets.dart';
@@ -43,12 +44,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _searchAction() {
+  void _searchAction() async {
     FocusScope.of(context).unfocus();
 
-    String link = _linkController.text;
-    if (link.isNotEmpty) {
-      _youtubeLinkBloc.add(YoutubeLinkSearch(link: link));
+    if (await Permission.storage.request().isGranted) {
+      String link = _linkController.text;
+      if (link.isNotEmpty) {
+        _youtubeLinkBloc.add(YoutubeLinkSearch(link: link));
+      }
     }
   }
 
@@ -60,72 +63,60 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _cancelDownloadAction(DownloadAudioModel downloadAudioModel) {
-    showGeneralDialog(
-      context: context,
-      barrierLabel: 'CancelDownloadDialog',
-      barrierDismissible: true,
-      transitionDuration: const Duration(milliseconds: 200),
-      transitionBuilder: (context, a1, a2, widget) {
-        return ScaleTransition(
-          scale: CurvedAnimation(
-            parent: a1,
-            curve: Curves.easeInOut,
-          ),
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(7.0),
-            ),
-            content: const Text('Are your sure to want cancel it ?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Get.back();
+    showAnimationDialog(
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(7.0),
+        ),
+        content: const Text('Are your sure to want cancel it ?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
 
-                  _downloadAudioBloc.add(DownloadAudioCancel(
-                      downloadAudioModel: downloadAudioModel));
-                },
-                child: const Text('Yes'),
-              ),
-              const SizedBox(width: 2.0),
-              ElevatedButton(
-                onPressed: () => Get.back(),
-                child: const Text('No'),
-              ),
-            ],
+              _downloadAudioBloc.add(
+                  DownloadAudioCancel(downloadAudioModel: downloadAudioModel));
+            },
+            child: const Text('Yes'),
           ),
-        );
-      },
-      pageBuilder: (context, a1, a2) => const SizedBox.shrink(),
+          const SizedBox(width: 2.0),
+          ElevatedButton(
+            onPressed: () => Get.back(),
+            child: const Text('No'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showVideoDescriptionDialog(
       DownloadAudioModel downloadAudioModel, bool showDownloadButton) {
-    showGeneralDialog(
-      context: context,
-      barrierLabel: 'VideoDescriptionDialog',
-      barrierDismissible: true,
-      transitionDuration: const Duration(milliseconds: 200),
-      transitionBuilder: (context, a1, a2, widget) {
-        return ScaleTransition(
-          scale: CurvedAnimation(
-            parent: a1,
-            curve: Curves.easeInOut,
-          ),
-          child: VideoDescriptionDialog(
-            downloadAudioModel: downloadAudioModel,
-            downloadAction: _downloadAction,
-            showDownloadButton: showDownloadButton,
-          ),
-        );
-      },
-      pageBuilder: (context, a1, a2) => const SizedBox.shrink(),
+    showAnimationDialog(
+      child: VideoDescriptionDialog(
+        downloadAudioModel: downloadAudioModel,
+        downloadAction: _downloadAction,
+        showDownloadButton: showDownloadButton,
+      ),
     );
   }
 
   void _youtubeLinkListener(BuildContext context, YoutubeLinkState state) {
     if (state is YoutubeLinkSearchSuccess) {
       _showVideoDescriptionDialog(state.downloadAudioModel, true);
+    }
+
+    if (state is YoutubeLinkError) {
+      showAnimationDialog(
+        child: AlertDialog(
+          content: const Text('Video cannot be downloaded'),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              child: const Text('Ok'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
