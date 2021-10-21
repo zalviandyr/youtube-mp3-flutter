@@ -26,19 +26,23 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
           }
         }
 
+        DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
+
         if (!isExist) {
           // insert to list
-          DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
           downloadAudioModel.downloadProgress =
               _downloadProgress(downloadAudioModel, emit);
 
-          listDownloadAudio.insert(0, downloadAudioModel);
+          listDownloadAudio.add(downloadAudioModel);
         }
+
+        int index =
+            listDownloadAudio.isEmpty ? 0 : listDownloadAudio.length - 1;
 
         emit(DownloadAudioProgress(
           listDownloadAudio: listDownloadAudio,
-          index: 0,
-          insertElement: event.downloadAudioModel,
+          index: index,
+          insertElement: downloadAudioModel,
           removeElement: null,
         ));
       } catch (err) {
@@ -48,9 +52,21 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
       }
     });
 
-    on<DownloadAudioCancel>((event, emit) async {
+    on<DownloadAudioRemove>((event, emit) async {
       try {
         DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
+
+        String tempPath = (await getTemporaryDirectory()).path +
+            '/${downloadAudioModel.title}.mp3';
+        // delete temp file when user cancel download
+        File file = File(tempPath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+
+        // close stream
+        downloadAudioModel.downloadProgress!.close();
+
         int index =
             listDownloadAudio.indexWhere((elm) => elm == downloadAudioModel);
         listDownloadAudio.removeAt(index);
@@ -59,7 +75,7 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
           listDownloadAudio: listDownloadAudio,
           index: index,
           insertElement: null,
-          removeElement: event.downloadAudioModel,
+          removeElement: downloadAudioModel,
         ));
       } catch (err) {
         log(err.toString(), name: 'DownloadAudioCancel');
@@ -69,14 +85,14 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
     });
   }
 
-  Stream<double> _downloadProgress(
+  PublishSubject<double> _downloadProgress(
       DownloadAudioModel downloadAudioModel, Emitter<DownloadAudioState> emit) {
-    final YoutubeExplode yt = YoutubeExplode();
-    late BehaviorSubject<double> controller;
+    late PublishSubject<double> controller;
     String trimmer(String str) => str.replaceAll(RegExp(r'[\/"]'), '');
 
     void onListen() async {
       try {
+        YoutubeExplode yt = YoutubeExplode();
         String id = downloadAudioModel.id;
         StreamManifest manifest = await yt.videos.streamsClient.getManifest(id);
         AudioOnlyStreamInfo audio = manifest.audioOnly.withHighestBitrate();
@@ -93,10 +109,12 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
         IOSink fileStream = file.openWrite(mode: FileMode.writeOnly);
 
         await for (var byteList in stream) {
-          fileStream.add(byteList);
+          if (!controller.isClosed) {
+            fileStream.add(byteList);
+            double progress = file.lengthSync() / size;
 
-          double progress = file.lengthSync() / size;
-          controller.add(progress);
+            controller.add(progress);
+          }
         }
 
         // get thumbnail
@@ -121,11 +139,15 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
         FFmpegKit.executeAsync(
           arguments.join(' '),
           (session) async {
+            // delete temp file
+            await File(tempPath).delete();
+
             await fileStream.flush();
             await fileStream.close();
+            yt.close();
 
             // when success remove item from list
-            add(DownloadAudioCancel(downloadAudioModel: downloadAudioModel));
+            add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
 
             // todo show snackbar sukses
           },
@@ -138,33 +160,14 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
         log(err.message, name: 'onListen DownloadAudioBloc');
 
         // remove item
-        add(DownloadAudioCancel(downloadAudioModel: downloadAudioModel));
+        add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
 
         // todo show snackbar
       }
     }
 
-    void onCancel() async {
-      String title = trimmer(downloadAudioModel.title);
-      String tempPath = (await getTemporaryDirectory()).path + '/$title.mp3';
+    controller = PublishSubject(onListen: onListen);
 
-      // delete temp file when user cancel or success download
-      File file = File(tempPath);
-      if (await file.exists()) {
-        await file.delete();
-      }
-
-      yt.close();
-
-      // close stream
-      await controller.close();
-    }
-
-    controller = BehaviorSubject(
-      onListen: onListen,
-      onCancel: onCancel,
-    );
-
-    return controller.stream;
+    return controller;
   }
 }

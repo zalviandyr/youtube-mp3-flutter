@@ -14,10 +14,10 @@ class DownloadAudioSubmit extends DownloadAudioEvent {
   List<Object?> get props => [downloadAudioModel];
 }
 
-class DownloadAudioCancel extends DownloadAudioEvent {
+class DownloadAudioRemove extends DownloadAudioEvent {
   final DownloadAudioModel downloadAudioModel;
 
-  const DownloadAudioCancel({required this.downloadAudioModel});
+  const DownloadAudioRemove({required this.downloadAudioModel});
 
   @override
   List<Object?> get props => [downloadAudioModel];

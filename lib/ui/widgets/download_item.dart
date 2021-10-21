@@ -135,11 +135,14 @@ class DownloadItem extends StatelessWidget {
           ),
           const Spacer(),
           StreamBuilder(
-            stream: downloadAudioModel.downloadProgress,
+            stream: downloadAudioModel.downloadProgress!.stream,
             builder: (context, AsyncSnapshot<double> snapshot) {
-              return LinearProgressIndicator(
-                value: snapshot.data ?? 0.0,
-              );
+              double progress = snapshot.data ?? 0.0;
+              if (progress >= 0.9 || !snapshot.hasData) {
+                return const LinearProgressIndicator();
+              } else {
+                return LinearProgressIndicator(value: progress);
+              }
             },
           ),
         ],

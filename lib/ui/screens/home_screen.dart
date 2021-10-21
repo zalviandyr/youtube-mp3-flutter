@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _linkController = TextEditingController();
   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey();
+  final List<DownloadAudioModel> _listDownloadAudioModel = [];
   late YoutubeLinkBloc _youtubeLinkBloc;
   late DownloadAudioBloc _downloadAudioBloc;
   late MusicBloc _musicBloc;
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Get.back();
 
               _downloadAudioBloc.add(
-                  DownloadAudioCancel(downloadAudioModel: downloadAudioModel));
+                  DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
             },
             child: const Text('Yes'),
           ),
@@ -124,6 +125,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _downloadAudioListener(BuildContext context, DownloadAudioState state) {
     if (state is DownloadAudioProgress) {
+      _listDownloadAudioModel.clear();
+      _listDownloadAudioModel.addAll(state.listDownloadAudio);
+
       if (state.insertElement != null) {
         _listKey.currentState!.insertItem(
           state.index,
@@ -170,22 +174,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text('Download progress'),
               ),
             ),
-            BlocBuilder<DownloadAudioBloc, DownloadAudioState>(
-              builder: (context, state) {
-                return SliverAnimatedList(
-                  key: _listKey,
-                  itemBuilder: (context, index, animation) {
-                    if (state is DownloadAudioProgress) {
-                      DownloadAudioModel downloadAudioModel =
-                          state.listDownloadAudio[index];
+            SliverAnimatedList(
+              key: _listKey,
+              itemBuilder: (context, index, animation) {
+                DownloadAudioModel downloadAudioModel =
+                    _listDownloadAudioModel[index];
 
-                      return _buildSlidingItem(
-                          context, downloadAudioModel, animation);
-                    }
-
-                    return const SizedBox.shrink();
-                  },
-                );
+                return _buildSlidingItem(
+                    context, downloadAudioModel, animation);
               },
             ),
           ],

@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:equatable/equatable.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 // ignore: must_be_immutable
@@ -10,7 +9,7 @@ class DownloadAudioModel extends Equatable {
   final String title;
   final String duration;
   final String size;
-  Stream<double>? downloadProgress;
+  PublishSubject<double>? downloadProgress;
 
   DownloadAudioModel({
     required this.id,
