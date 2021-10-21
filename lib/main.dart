@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider(create: (_) => YoutubeLinkBloc()),
           BlocProvider(create: (_) => DownloadAudioBloc()),
+          BlocProvider(create: (_) => MusicBloc()),
         ],
         child: GetMaterialApp(
           title: 'Youtube Mp3',
@@ -32,7 +33,8 @@ class MyApp extends StatelessWidget {
             fontFamily: 'JosefinSans',
             scaffoldBackgroundColor: const Color(0xFFF3F2F3),
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFEE6C4D),
+              // primary: Color(0xFFEE6C4D),
+              primary: Color(0xFF09A4DB),
               secondary: Color(0xFF98C1D9),
             ),
             textTheme: TextTheme(

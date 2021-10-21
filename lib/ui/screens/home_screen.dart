@@ -20,11 +20,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey();
   late YoutubeLinkBloc _youtubeLinkBloc;
   late DownloadAudioBloc _downloadAudioBloc;
+  late MusicBloc _musicBloc;
 
   @override
   void initState() {
     _youtubeLinkBloc = BlocProvider.of<YoutubeLinkBloc>(context);
     _downloadAudioBloc = BlocProvider.of<DownloadAudioBloc>(context);
+    _musicBloc = BlocProvider.of<MusicBloc>(context);
 
     super.initState();
   }
@@ -136,6 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildSlidingItem(context, state.removeElement!, animation),
           duration: const Duration(milliseconds: 500),
         );
+
+        // re-fetch music in playlist screen
+        _musicBloc.add(MusicFetch());
       }
     }
   }

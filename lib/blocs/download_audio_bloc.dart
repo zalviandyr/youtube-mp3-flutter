@@ -3,9 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
@@ -73,12 +71,12 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
 
   Stream<double> _downloadProgress(
       DownloadAudioModel downloadAudioModel, Emitter<DownloadAudioState> emit) {
+    final YoutubeExplode yt = YoutubeExplode();
     late BehaviorSubject<double> controller;
     String trimmer(String str) => str.replaceAll(RegExp(r'[\/"]'), '');
 
     void onListen() async {
       try {
-        YoutubeExplode yt = YoutubeExplode();
         String id = downloadAudioModel.id;
         StreamManifest manifest = await yt.videos.streamsClient.getManifest(id);
         AudioOnlyStreamInfo audio = manifest.audioOnly.withHighestBitrate();
@@ -125,7 +123,6 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
           (session) async {
             await fileStream.flush();
             await fileStream.close();
-            yt.close();
 
             // when success remove item from list
             add(DownloadAudioCancel(downloadAudioModel: downloadAudioModel));
@@ -156,6 +153,8 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
       if (await file.exists()) {
         await file.delete();
       }
+
+      yt.close();
 
       // close stream
       await controller.close();
