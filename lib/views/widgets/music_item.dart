@@ -4,10 +4,12 @@ import 'package:youtube_mp3/models/models.dart';
 
 class MusicItem extends StatelessWidget {
   final MusicModel musicModel;
+  final ValueSetter<MusicModel> onTap;
 
   const MusicItem({
     Key? key,
     required this.musicModel,
+    required this.onTap,
   }) : super(key: key);
 
   @override
@@ -70,7 +72,7 @@ class MusicItem extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: () => onTap(musicModel),
                 borderRadius: BorderRadius.circular(7.0),
               ),
             ),

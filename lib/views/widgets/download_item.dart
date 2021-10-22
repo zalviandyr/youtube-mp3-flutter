@@ -108,6 +108,7 @@ class DownloadItem extends StatelessWidget {
                     height: 90.0,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           downloadAudioModel.title,
@@ -118,7 +119,6 @@ class DownloadItem extends StatelessWidget {
                               .bodyText1!
                               .copyWith(fontWeight: FontWeight.w600),
                         ),
-                        const Spacer(),
                         Row(
                           children: [
                             Text(downloadAudioModel.duration),

@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
-class MusicModel {
+import 'package:equatable/equatable.dart';
+
+class MusicModel extends Equatable {
   final Uint8List thumbnails;
   final String title;
   final String duration;
@@ -12,4 +14,7 @@ class MusicModel {
     required this.duration,
     required this.path,
   });
+
+  @override
+  List<Object?> get props => [path];
 }

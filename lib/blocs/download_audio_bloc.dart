@@ -92,82 +92,90 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
     String trimmer(String str) => str.replaceAll(RegExp(r'[\/"]'), '');
 
     void onListen() async {
-      try {
-        YoutubeExplode yt = YoutubeExplode();
-        String id = downloadAudioModel.id;
-        StreamManifest manifest = await yt.videos.streamsClient.getManifest(id);
-        AudioOnlyStreamInfo audio = manifest.audioOnly.withHighestBitrate();
-        Stream stream = yt.videos.streamsClient.get(audio);
-        int size = audio.size.totalBytes;
+      if (!controller.isClosed) {
+        try {
+          YoutubeExplode yt = YoutubeExplode();
+          String id = downloadAudioModel.id;
+          StreamManifest manifest =
+              await yt.videos.streamsClient.getManifest(id);
+          AudioOnlyStreamInfo audio = manifest.audioOnly.withHighestBitrate();
+          Stream stream = yt.videos.streamsClient.get(audio);
+          int size = audio.size.totalBytes;
+          log('Start download success', name: 'onListen - DownloadAudioBloc');
 
-        // remove backslash and double quote
-        String title = trimmer(downloadAudioModel.title);
-        String tempPath = (await getTemporaryDirectory()).path + '/$title.mp3';
-        String path =
-            (await getExternalStorageDirectory())!.path + '/$title.mp3';
+          // remove backslash and double quote
+          String title = trimmer(downloadAudioModel.title);
+          String tempPath =
+              (await getTemporaryDirectory()).path + '/$title.mp3';
+          String path =
+              (await getExternalStorageDirectory())!.path + '/$title.mp3';
 
-        File file = File(tempPath);
-        IOSink fileStream = file.openWrite(mode: FileMode.writeOnly);
+          File file = File(tempPath);
+          IOSink fileStream = file.openWrite(mode: FileMode.writeOnly);
 
-        await for (var byteList in stream) {
-          if (!controller.isClosed) {
+          await for (var byteList in stream) {
             fileStream.add(byteList);
             double progress = file.lengthSync() / size;
 
             controller.add(progress);
           }
+
+          log('Download success', name: 'onListen - DownloadAudioBloc');
+          // get thumbnail
+          String thumb = downloadAudioModel.thumbnails.maxResUrl;
+          Response response = await GetConnect().get(thumb);
+          if (response.hasError) {
+            thumb = downloadAudioModel.thumbnails.mediumResUrl;
+          }
+
+          // set metadata
+          List<String> arguments = [
+            '-i "$tempPath"',
+            '-i $thumb',
+            '-map 0 -map 1',
+            '-c:v:1 png',
+            '-c:a:0 mp3',
+            '-disposition:v:1 attached_pic',
+            '-metadata title="$title"',
+            '-y "$path"'
+          ];
+
+          log('Adding metadata use FFmpegKit',
+              name: 'onListen - DownloadAudioBloc');
+          FFmpegKit.executeAsync(
+            arguments.join(' '),
+            (session) async {
+              // delete temp file
+              await File(tempPath).delete();
+
+              await fileStream.flush();
+              await fileStream.close();
+              yt.close();
+
+              // when success remove item from list
+              add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
+
+              // show snackbar
+              showSnackbar(downloadAudioModel.title,
+                  title: 'Success download audio');
+            },
+            (logMessage) {
+              log(logMessage.getMessage(), name: 'FFmpegKit');
+            },
+          );
+        } on FatalFailureException catch (err) {
+          // error when failed to retrieve download url
+          log(err.message, name: 'FatalFailureException - DownloadAudioBloc');
+
+          // remove item
+          add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
+
+          // show snackbar
+          showSnackbar(downloadAudioModel.title,
+              title: 'Failed download audio', isError: true);
+        } catch (err) {
+          log(err.toString(), name: 'Exception - DownloadAudioBloc');
         }
-
-        // get thumbnail
-        String thumb = downloadAudioModel.thumbnails.maxResUrl;
-        Response response = await GetConnect().get(thumb);
-        if (response.hasError) {
-          thumb = downloadAudioModel.thumbnails.mediumResUrl;
-        }
-
-        // set metadata
-        List<String> arguments = [
-          '-i "$tempPath"',
-          '-i $thumb',
-          '-map 0 -map 1',
-          '-c:v:1 png',
-          '-c:a:0 mp3',
-          '-disposition:v:1 attached_pic',
-          '-metadata title="$title"',
-          '-y "$path"'
-        ];
-
-        FFmpegKit.executeAsync(
-          arguments.join(' '),
-          (session) async {
-            // delete temp file
-            await File(tempPath).delete();
-
-            await fileStream.flush();
-            await fileStream.close();
-            yt.close();
-
-            // when success remove item from list
-            add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
-
-            // show snackbar
-            showSnackbar(downloadAudioModel.title,
-                title: 'Success download audio');
-          },
-          (logMessage) {
-            log(logMessage.getMessage(), name: 'FFmpegKit');
-          },
-        );
-      } on FatalFailureException catch (err) {
-        // error when failed to retrieve download url
-        log(err.message, name: 'onListen DownloadAudioBloc');
-
-        // remove item
-        add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
-
-        // show snackbar
-        showSnackbar(downloadAudioModel.title,
-            title: 'Failed download audio', isError: true);
       }
     }
 

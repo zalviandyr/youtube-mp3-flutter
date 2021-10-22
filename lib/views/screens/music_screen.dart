@@ -15,10 +15,14 @@ class MusicScreen extends StatefulWidget {
 class _MusicScreenState extends State<MusicScreen> {
   final TextEditingController _searchController = TextEditingController();
   late MusicBloc _musicBloc;
+  late AudioPlayerBloc _audioPlayerBloc;
+  double _paddingBottom = 10.0;
 
   @override
   void initState() {
+    // bloc
     _musicBloc = BlocProvider.of<MusicBloc>(context);
+    _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
 
     _musicBloc.add(MusicFetch());
 
@@ -40,41 +44,56 @@ class _MusicScreenState extends State<MusicScreen> {
     }
   }
 
+  void _musicAction(MusicModel music) {
+    _audioPlayerBloc.add(AudioPlayerPlay(init: true, music: music));
+  }
+
+  void _audioPlayerListener(BuildContext context, AudioPlayerState state) {
+    if (state is AudioPlayerInitialized) {
+      setState(() => _paddingBottom = 100.0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  top: kToolbarHeight, left: 10.0, right: 10.0),
-              child: _buildSearchBar(),
+    return BlocListener<AudioPlayerBloc, AudioPlayerState>(
+      listener: _audioPlayerListener,
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: kToolbarHeight, left: 10.0, right: 10.0),
+                child: _buildSearchBar(),
+              ),
             ),
-          ),
-          BlocBuilder<MusicBloc, MusicState>(
-            builder: (context, state) {
-              return SliverPadding(
-                // todo, padding botttom flexible jika ada audio player
-                padding: const EdgeInsets.only(top: 10.0, bottom: 100.0),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (state is MusicInitialized) {
-                        MusicModel music = state.musics[index];
-                        return MusicItem(musicModel: music);
-                      }
+            BlocBuilder<MusicBloc, MusicState>(
+              builder: (context, state) {
+                return SliverPadding(
+                  padding: EdgeInsets.only(top: 10.0, bottom: _paddingBottom),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (state is MusicInitialized) {
+                          MusicModel music = state.musics[index];
+                          return MusicItem(
+                            musicModel: music,
+                            onTap: _musicAction,
+                          );
+                        }
 
-                      return const SizedBox.shrink();
-                    },
-                    childCount:
-                        state is MusicInitialized ? state.musics.length : 0,
+                        return const SizedBox.shrink();
+                      },
+                      childCount:
+                          state is MusicInitialized ? state.musics.length : 0,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

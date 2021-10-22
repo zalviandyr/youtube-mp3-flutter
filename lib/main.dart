@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (_) => YoutubeLinkBloc()),
           BlocProvider(create: (_) => DownloadAudioBloc()),
           BlocProvider(create: (_) => MusicBloc()),
+          BlocProvider(create: (_) => AudioPlayerBloc()),
         ],
         child: GetMaterialApp(
           title: 'Youtube Mp3',
