@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
-import 'package:youtube_mp3/ui/screens/screens.dart';
+import 'package:youtube_mp3/views/screens/screens.dart';
 
 // TODO: add home screen tutorial
 void main() => runApp(const MyApp());
