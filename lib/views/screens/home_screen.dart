@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _cancelDownloadAction(DownloadAudioModel downloadAudioModel) {
     showAnimationDialog(
-      child: AlertDialog(
+      dialog: AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(7.0),
         ),
@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showVideoDescriptionDialog(
       DownloadAudioModel downloadAudioModel, bool showDownloadButton) {
     showAnimationDialog(
-      child: VideoDescriptionDialog(
+      dialog: VideoDescriptionDialog(
         downloadAudioModel: downloadAudioModel,
         downloadAction: _downloadAction,
         showDownloadButton: showDownloadButton,
@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (state is YoutubeLinkError) {
       showAnimationDialog(
-        child: AlertDialog(
+        dialog: AlertDialog(
           content: const Text('Video cannot be downloaded'),
           actions: [
             ElevatedButton(
