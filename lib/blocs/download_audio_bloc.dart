@@ -10,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/views/widgets/widgets.dart';
 
 class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
   final List<DownloadAudioModel> listDownloadAudio = [];
@@ -149,7 +150,9 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
             // when success remove item from list
             add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
 
-            // todo show snackbar sukses
+            // show snackbar
+            showSnackbar(downloadAudioModel.title,
+                title: 'Success download audio');
           },
           (logMessage) {
             log(logMessage.getMessage(), name: 'FFmpegKit');
@@ -162,7 +165,9 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
         // remove item
         add(DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
 
-        // todo show snackbar
+        // show snackbar
+        showSnackbar(downloadAudioModel.title,
+            title: 'Failed download audio', isError: true);
       }
     }
 

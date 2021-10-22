@@ -52,26 +52,28 @@ class _MusicScreenState extends State<MusicScreen> {
               child: _buildSearchBar(),
             ),
           ),
-          BlocBuilder<MusicBloc, MusicState>(builder: (context, state) {
-            return SliverPadding(
-              // todo, padding botttom flexible jika ada audio player
-              padding: const EdgeInsets.only(top: 10.0, bottom: 100.0),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (state is MusicInitialized) {
-                      MusicModel music = state.musics[index];
-                      return MusicItem(musicModel: music);
-                    }
+          BlocBuilder<MusicBloc, MusicState>(
+            builder: (context, state) {
+              return SliverPadding(
+                // todo, padding botttom flexible jika ada audio player
+                padding: const EdgeInsets.only(top: 10.0, bottom: 100.0),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (state is MusicInitialized) {
+                        MusicModel music = state.musics[index];
+                        return MusicItem(musicModel: music);
+                      }
 
-                    return const SizedBox.shrink();
-                  },
-                  childCount:
-                      state is MusicInitialized ? state.musics.length : 0,
+                      return const SizedBox.shrink();
+                    },
+                    childCount:
+                        state is MusicInitialized ? state.musics.length : 0,
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            },
+          ),
         ],
       ),
     );
