@@ -5,14 +5,14 @@ import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
 
-class PlaylistScreen extends StatefulWidget {
-  const PlaylistScreen({Key? key}) : super(key: key);
+class MusicScreen extends StatefulWidget {
+  const MusicScreen({Key? key}) : super(key: key);
 
   @override
-  _PlaylistScreenState createState() => _PlaylistScreenState();
+  _MusicScreenState createState() => _MusicScreenState();
 }
 
-class _PlaylistScreenState extends State<PlaylistScreen> {
+class _MusicScreenState extends State<MusicScreen> {
   final TextEditingController _searchController = TextEditingController();
   late MusicBloc _musicBloc;
 
@@ -54,7 +54,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           ),
           BlocBuilder<MusicBloc, MusicState>(builder: (context, state) {
             return SliverPadding(
-              padding: const EdgeInsets.only(top: 10.0),
+              // todo, padding botttom flexible jika ada audio player
+              padding: const EdgeInsets.only(top: 10.0, bottom: 100.0),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {

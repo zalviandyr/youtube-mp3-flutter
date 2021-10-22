@@ -12,8 +12,8 @@ class NavigationScreen extends StatefulWidget {
 class _NavigationScreenState extends State<NavigationScreen> {
   final List<Widget> screens = const [
     HomeScreen(),
-    PlaylistScreen(),
-    PlaylistScreen(),
+    MusicScreen(),
+    MusicScreen(),
   ];
   int _curIndex = 0;
 
@@ -101,7 +101,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           ),
           BottomNavigationBarItem(
-            label: 'Playlist',
+            label: 'Music',
             icon: FaIcon(
               FontAwesomeIcons.music,
               size: 20.0,
