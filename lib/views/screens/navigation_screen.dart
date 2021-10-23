@@ -12,20 +12,36 @@ class NavigationScreen extends StatefulWidget {
   _NavigationScreenState createState() => _NavigationScreenState();
 }
 
-class _NavigationScreenState extends State<NavigationScreen> {
-  final List<Widget> screens = const [
+class _NavigationScreenState extends State<NavigationScreen>
+    with SingleTickerProviderStateMixin {
+  final List<Widget> _screens = const [
     HomeScreen(),
     MusicScreen(),
     MusicScreen(),
   ];
+  late AnimationController _animationController;
   late AudioPlayerBloc _audioPlayerBloc;
   int _curIndex = 0;
 
   @override
   void initState() {
+    // bloc
     _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
 
+    // animation
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+
+    super.dispose();
   }
 
   void _navAction(int index) {
@@ -45,7 +61,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   void _audioPlayerListener(BuildContext context, AudioPlayerState state) {
     if (state is AudioPlayerInitialized) {
-      print(state.audioState);
+      _animationController.forward();
     }
   }
 
@@ -55,7 +71,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       body: Stack(
         children: [
           Stack(
-            children: screens
+            children: _screens
                 .asMap()
                 .entries
                 .map((e) => Offstage(
@@ -72,9 +88,21 @@ class _NavigationScreenState extends State<NavigationScreen> {
               listener: _audioPlayerListener,
               builder: (context, state) {
                 if (state is AudioPlayerInitialized) {
-                  return AudioPlayerBox(
-                    onPlayPause: _playPauseAction,
-                    progress: state.audioProgress,
+                  return AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return ScaleTransition(
+                        scale: CurvedAnimation(
+                          parent: _animationController,
+                          curve: Curves.easeInOut,
+                        ),
+                        child: child,
+                      );
+                    },
+                    child: AudioPlayerBox(
+                      onPlayPause: _playPauseAction,
+                      progress: state.audioProgress,
+                    ),
                   );
                 }
 

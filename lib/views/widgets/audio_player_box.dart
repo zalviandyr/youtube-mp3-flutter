@@ -51,6 +51,7 @@ class AudioPlayerBox extends StatelessWidget {
                         accelerationDuration: const Duration(seconds: 1),
                         fadingEdgeStartFraction: 0.1,
                         fadingEdgeEndFraction: 0.1,
+                        blankSpace: 30.0,
                       ),
                     ),
                   );
