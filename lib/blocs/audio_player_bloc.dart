@@ -6,12 +6,13 @@ import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/helpers/string_helper.dart';
 import 'package:youtube_mp3/models/models.dart';
 
 class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   // create progress stream
-  late PublishSubject<double> audioProgressStream = _audioProgress();
+  late Stream<Map<String, dynamic>> audioProgressStream = _audioProgress();
   late MusicModel _music;
 
   AudioPlayerBloc() : super(AudioPlayerUninitialized()) {
@@ -78,24 +79,26 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     );
   }
 
-  PublishSubject<double> _audioProgress() {
-    late PublishSubject<double> controller;
+  Stream<Map<String, dynamic>> _audioProgress() {
+    late BehaviorSubject<Map<String, dynamic>> controller;
 
     void onListen() {
-      if (!controller.isClosed) {
-        _audioPlayer.positionStream.listen((duration) {
-          int audioDuration = _audioPlayer.duration?.inSeconds ?? 0;
-          double progress = duration.inSeconds / audioDuration;
+      _audioPlayer.positionStream.listen((duration) {
+        int audioDuration = _audioPlayer.duration?.inSeconds ?? 0;
+        double progress = duration.inSeconds / audioDuration;
 
-          if (progress.isFinite) {
-            controller.add(progress);
-          }
-        });
-      }
+        if (progress.isFinite) {
+          controller.add({
+            'curDuration': durationToString(_audioPlayer.duration!),
+            'totDuration': durationToString(duration),
+            'progress': progress,
+          });
+        }
+      });
     }
 
-    controller = PublishSubject(onListen: onListen);
+    controller = BehaviorSubject(onListen: onListen);
 
-    return controller;
+    return controller.stream;
   }
 }

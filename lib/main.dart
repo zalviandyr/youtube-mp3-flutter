@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
           home: const NavigationScreen(),
+          // home: const AudioPlayerScreen(),
         ),
       ),
     );

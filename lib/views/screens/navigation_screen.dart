@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:get/get_navigation/get_navigation.dart' as getNavigation;
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
@@ -59,6 +61,33 @@ class _NavigationScreenState extends State<NavigationScreen>
     }
   }
 
+  void _toAudioPlayerAction() {
+    BorderRadius borderRadius = const BorderRadius.only(
+      topLeft: Radius.circular(10.0),
+      topRight: Radius.circular(10.0),
+    );
+
+    AudioPlayerState state = _audioPlayerBloc.state;
+    if (state is AudioPlayerInitialized) {
+      showModalBottomSheet(
+        context: context,
+        constraints: const BoxConstraints(maxHeight: 550),
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: borderRadius,
+        ),
+        builder: (context) {
+          return AudioPlayerModal(
+            borderRadius: borderRadius,
+            music: state.music,
+            progress: state.audioProgress,
+          );
+        },
+      );
+    }
+  }
+
   void _audioPlayerListener(BuildContext context, AudioPlayerState state) {
     if (state is AudioPlayerInitialized) {
       _animationController.forward();
@@ -101,6 +130,7 @@ class _NavigationScreenState extends State<NavigationScreen>
                     },
                     child: AudioPlayerBox(
                       onPlayPause: _playPauseAction,
+                      onDetail: _toAudioPlayerAction,
                       progress: state.audioProgress,
                     ),
                   );

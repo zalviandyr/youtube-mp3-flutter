@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/helpers/string_helper.dart';
 import 'package:youtube_mp3/models/models.dart';
 
 class YoutubeLinkBloc extends Bloc<YoutubeLinkEvent, YoutubeLinkState> {
@@ -21,17 +22,12 @@ class YoutubeLinkBloc extends Bloc<YoutubeLinkEvent, YoutubeLinkState> {
 
         yt.close();
 
-        String twoDigits(int? n) => n?.toString().padLeft(2, '0') ?? '00';
-        String hour = twoDigits(video.duration?.inHours);
-        String minute = twoDigits(video.duration?.inMinutes.remainder(60));
-        String second = twoDigits(video.duration?.inSeconds.remainder(60));
-
         emit(YoutubeLinkSearchSuccess(
           downloadAudioModel: DownloadAudioModel(
             id: video.id.value,
             thumbnails: video.thumbnails,
             title: video.title,
-            duration: hour + ':' + minute + ':' + second,
+            duration: durationToString(video.duration!),
             size: audio.size.totalMegaBytes.toStringAsFixed(2),
           ),
         ));
