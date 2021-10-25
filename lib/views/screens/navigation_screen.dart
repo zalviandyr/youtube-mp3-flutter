@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
-import 'package:get/get_navigation/get_navigation.dart' as getNavigation;
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
