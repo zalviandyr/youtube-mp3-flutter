@@ -24,7 +24,10 @@ class _MusicScreenState extends State<MusicScreen> {
     _musicBloc = BlocProvider.of<MusicBloc>(context);
     _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
 
-    _musicBloc.add(MusicFetch());
+    MusicState state = _musicBloc.state;
+    if (state is! MusicInitialized) {
+      _musicBloc.add(MusicFetch());
+    }
 
     super.initState();
   }

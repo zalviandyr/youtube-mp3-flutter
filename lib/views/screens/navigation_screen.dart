@@ -14,9 +14,10 @@ class NavigationScreen extends StatefulWidget {
 
 class _NavigationScreenState extends State<NavigationScreen>
     with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _key = GlobalKey();
+  final PageController _pageController = PageController();
   final List<Widget> _screens = const [
     HomeScreen(),
-    MusicScreen(),
     MusicScreen(),
   ];
   late AnimationController _animationController;
@@ -40,12 +41,17 @@ class _NavigationScreenState extends State<NavigationScreen>
   @override
   void dispose() {
     _animationController.dispose();
+    _pageController.dispose();
 
     super.dispose();
   }
 
   void _navAction(int index) {
-    setState(() => _curIndex = index);
+    _pageController.animateToPage(
+      index,
+      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 200),
+    );
   }
 
   void _playPauseAction() {
@@ -91,17 +97,16 @@ class _NavigationScreenState extends State<NavigationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       body: Stack(
         children: [
-          Stack(
-            children: _screens
-                .asMap()
-                .entries
-                .map((e) => Offstage(
-                      offstage: e.key != _curIndex,
-                      child: e.value,
-                    ))
-                .toList(),
+          PageView.builder(
+            controller: _pageController,
+            itemBuilder: (context, index) {
+              return _screens[index];
+            },
+            itemCount: _screens.length,
+            onPageChanged: (index) => setState(() => _curIndex = index),
           ),
           Positioned(
             left: 0.0,
@@ -152,13 +157,6 @@ class _NavigationScreenState extends State<NavigationScreen>
             label: 'Music',
             icon: FaIcon(
               FontAwesomeIcons.music,
-              size: 20.0,
-            ),
-          ),
-          BottomNavigationBarItem(
-            label: 'Profile',
-            icon: FaIcon(
-              FontAwesomeIcons.solidUser,
               size: 20.0,
             ),
           ),
