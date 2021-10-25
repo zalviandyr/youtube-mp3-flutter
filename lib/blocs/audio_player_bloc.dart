@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
@@ -30,10 +31,11 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
           List<File> musics = dir.listSync().map((e) => File(e.path)).toList();
 
           int indexToPlay = musics.indexWhere((elm) => elm.path == _music.path);
-          _audioPlayer.setAudioSource(
+          await _audioPlayer.setAudioSource(
             _createPlaylist(musics),
             initialIndex: indexToPlay,
           );
+          await _audioPlayer.setLoopMode(LoopMode.all);
         }
 
         // play audio
@@ -62,6 +64,72 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
         ));
       } catch (err) {
         log(err.toString(), name: 'AudioPlayerPause');
+
+        emit(AudioPlayerError());
+      }
+    });
+
+    on<AudioPlayerNext>((event, emit) async {
+      try {
+        await _audioPlayer.seekToNext();
+        _audioPlayer.play();
+        int index = _audioPlayer.currentIndex ?? 0;
+
+        Directory dir = (await getExternalStorageDirectory())!;
+        File file = dir.listSync().map((e) => File(e.path)).toList()[index];
+
+        Metadata metadata = await MetadataRetriever.fromFile(file);
+        int toSecond = metadata.trackDuration! ~/ 1000;
+        String minute = twoDigits(toSecond ~/ 60);
+        String second = twoDigits(toSecond.remainder(60));
+
+        _music = MusicModel(
+          thumbnails: metadata.albumArt!,
+          title: metadata.trackName!,
+          duration: minute + ':' + second,
+          path: file.path,
+        );
+
+        emit(AudioPlayerInitialized(
+          music: _music,
+          audioState: AudioStateEnum.playing,
+          audioProgress: audioProgressStream,
+        ));
+      } catch (err) {
+        log(err.toString(), name: 'AudioPlayerNext');
+
+        emit(AudioPlayerError());
+      }
+    });
+
+    on<AudioPlayerPrev>((event, emit) async {
+      try {
+        await _audioPlayer.seekToPrevious();
+        _audioPlayer.play();
+        int index = _audioPlayer.currentIndex ?? 0;
+
+        Directory dir = (await getExternalStorageDirectory())!;
+        File file = dir.listSync().map((e) => File(e.path)).toList()[index];
+
+        Metadata metadata = await MetadataRetriever.fromFile(file);
+        int toSecond = metadata.trackDuration! ~/ 1000;
+        String minute = twoDigits(toSecond ~/ 60);
+        String second = twoDigits(toSecond.remainder(60));
+
+        _music = MusicModel(
+          thumbnails: metadata.albumArt!,
+          title: metadata.trackName!,
+          duration: minute + ':' + second,
+          path: file.path,
+        );
+
+        emit(AudioPlayerInitialized(
+          music: _music,
+          audioState: AudioStateEnum.playing,
+          audioProgress: audioProgressStream,
+        ));
+      } catch (err) {
+        log(err.toString(), name: 'AudioPlayerPrev');
 
         emit(AudioPlayerError());
       }

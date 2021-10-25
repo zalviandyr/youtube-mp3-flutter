@@ -22,3 +22,13 @@ class AudioPlayerPause extends AudioPlayerEvent {
   @override
   List<Object?> get props => [];
 }
+
+class AudioPlayerNext extends AudioPlayerEvent {
+  @override
+  List<Object?> get props => [];
+}
+
+class AudioPlayerPrev extends AudioPlayerEvent {
+  @override
+  List<Object?> get props => [];
+}

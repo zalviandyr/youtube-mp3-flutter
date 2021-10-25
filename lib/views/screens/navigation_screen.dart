@@ -59,31 +59,27 @@ class _NavigationScreenState extends State<NavigationScreen>
     }
   }
 
-  void _toAudioPlayerAction() {
+  void _showAudioPlayerAction() {
     BorderRadius borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(10.0),
       topRight: Radius.circular(10.0),
     );
 
-    AudioPlayerState state = _audioPlayerBloc.state;
-    if (state is AudioPlayerInitialized) {
-      showModalBottomSheet(
-        context: context,
-        constraints: const BoxConstraints(maxHeight: 550),
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
+    showModalBottomSheet(
+      context: context,
+      constraints: const BoxConstraints(maxHeight: 550),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+      ),
+      builder: (context) {
+        return AudioPlayerModal(
           borderRadius: borderRadius,
-        ),
-        builder: (context) {
-          return AudioPlayerModal(
-            borderRadius: borderRadius,
-            music: state.music,
-            progress: state.audioProgress,
-          );
-        },
-      );
-    }
+          playPauseAction: _playPauseAction,
+        );
+      },
+    );
   }
 
   void _audioPlayerListener(BuildContext context, AudioPlayerState state) {
@@ -128,7 +124,7 @@ class _NavigationScreenState extends State<NavigationScreen>
                     },
                     child: AudioPlayerBox(
                       onPlayPause: _playPauseAction,
-                      onDetail: _toAudioPlayerAction,
+                      onDetail: _showAudioPlayerAction,
                       progress: state.audioProgress,
                     ),
                   );
