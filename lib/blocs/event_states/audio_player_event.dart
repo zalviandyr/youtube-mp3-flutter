@@ -6,10 +6,12 @@ abstract class AudioPlayerEvent extends Equatable {
 }
 
 class AudioPlayerPlay extends AudioPlayerEvent {
+  final List<MusicModel>? musics;
   final MusicModel? music;
   final bool init;
 
   const AudioPlayerPlay({
+    this.musics,
     this.music,
     this.init = false,
   });

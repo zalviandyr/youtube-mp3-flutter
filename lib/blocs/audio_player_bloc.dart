@@ -14,6 +14,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   // create progress stream
   late Stream<Map<String, dynamic>> audioProgressStream = _audioProgress();
+  late List<MusicModel> _musics;
   late MusicModel _music;
 
   AudioPlayerBloc() : super(AudioPlayerUninitialized()) {
@@ -23,6 +24,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
         if (event.init) {
           // init music model
           _music = event.music!;
+          _musics = event.musics!;
 
           // stop previous audio
           await _audioPlayer.stop();
@@ -43,6 +45,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
         emit(AudioPlayerInitialized(
           music: _music,
+          musics: _musics,
           audioState: AudioStateEnum.playing,
           audioProgress: audioProgressStream,
         ));
@@ -59,6 +62,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
         emit(AudioPlayerInitialized(
           music: _music,
+          musics: _musics,
           audioState: AudioStateEnum.pausing,
           audioProgress: audioProgressStream,
         ));
@@ -92,6 +96,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
         emit(AudioPlayerInitialized(
           music: _music,
+          musics: _musics,
           audioState: AudioStateEnum.playing,
           audioProgress: audioProgressStream,
         ));
@@ -125,6 +130,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
         emit(AudioPlayerInitialized(
           music: _music,
+          musics: _musics,
           audioState: AudioStateEnum.playing,
           audioProgress: audioProgressStream,
         ));

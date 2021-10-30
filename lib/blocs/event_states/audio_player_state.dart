@@ -22,11 +22,13 @@ class AudioPlayerError extends AudioPlayerState {
 
 class AudioPlayerInitialized extends AudioPlayerState {
   final MusicModel music;
+  final List<MusicModel> musics;
   final AudioStateEnum audioState;
   final Stream<Map<String, dynamic>>? audioProgress;
 
   const AudioPlayerInitialized({
     required this.music,
+    required this.musics,
     required this.audioState,
     required this.audioProgress,
   });

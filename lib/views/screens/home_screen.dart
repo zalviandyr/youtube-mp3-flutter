@@ -15,7 +15,8 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin<HomeScreen> {
   final TextEditingController _linkController = TextEditingController();
   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey();
   final List<DownloadAudioModel> _listDownloadAudioModel = [];
@@ -25,9 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    print('home screen');
     _youtubeLinkBloc = BlocProvider.of<YoutubeLinkBloc>(context);
     _downloadAudioBloc = BlocProvider.of<DownloadAudioBloc>(context);
     _musicBloc = BlocProvider.of<MusicBloc>(context);
+
+    // _setListDownloadAudioModel();
 
     super.initState();
   }
@@ -37,6 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
     _linkController.dispose();
 
     super.dispose();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  void _setListDownloadAudioModel() {
+    DownloadAudioState state = _downloadAudioBloc.state;
+    if (state is DownloadAudioProgress) {
+      _listDownloadAudioModel.clear();
+      _listDownloadAudioModel.addAll(state.listDownloadAudio);
+    }
   }
 
   void _pasteAction() async {
@@ -151,6 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return MultiBlocListener(
       listeners: [
         BlocListener<YoutubeLinkBloc, YoutubeLinkState>(

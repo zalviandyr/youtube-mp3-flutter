@@ -100,12 +100,9 @@ class _NavigationScreenState extends State<NavigationScreen>
       key: _key,
       body: Stack(
         children: [
-          PageView.builder(
+          PageView(
             controller: _pageController,
-            itemBuilder: (context, index) {
-              return _screens[index];
-            },
-            itemCount: _screens.length,
+            children: _screens,
             onPageChanged: (index) => setState(() => _curIndex = index),
           ),
           Positioned(

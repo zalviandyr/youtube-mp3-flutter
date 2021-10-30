@@ -50,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
+  carousel_slider:
+    dependency: "direct main"
+    description:
+      path: "plugins/flutter_carousel_slider"
+      relative: true
+    source: path
+    version: "4.0.0"
   characters:
     dependency: transitive
     description:

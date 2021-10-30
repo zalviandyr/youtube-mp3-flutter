@@ -12,7 +12,8 @@ class MusicScreen extends StatefulWidget {
   _MusicScreenState createState() => _MusicScreenState();
 }
 
-class _MusicScreenState extends State<MusicScreen> {
+class _MusicScreenState extends State<MusicScreen>
+    with AutomaticKeepAliveClientMixin<MusicScreen> {
   final TextEditingController _searchController = TextEditingController();
   late MusicBloc _musicBloc;
   late AudioPlayerBloc _audioPlayerBloc;
@@ -20,6 +21,7 @@ class _MusicScreenState extends State<MusicScreen> {
 
   @override
   void initState() {
+    print('music screen');
     // bloc
     _musicBloc = BlocProvider.of<MusicBloc>(context);
     _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
@@ -39,6 +41,9 @@ class _MusicScreenState extends State<MusicScreen> {
     super.dispose();
   }
 
+  @override
+  bool get wantKeepAlive => true;
+
   void _searchAction(String value) {
     FocusScope.of(context).unfocus();
 
@@ -48,7 +53,13 @@ class _MusicScreenState extends State<MusicScreen> {
   }
 
   void _musicAction(MusicModel music) {
-    _audioPlayerBloc.add(AudioPlayerPlay(init: true, music: music));
+    MusicState state = _musicBloc.state;
+
+    if (state is MusicInitialized) {
+      _audioPlayerBloc.add(
+        AudioPlayerPlay(init: true, musics: state.musics, music: music),
+      );
+    }
   }
 
   void _audioPlayerListener(BuildContext context, AudioPlayerState state) {
@@ -59,6 +70,8 @@ class _MusicScreenState extends State<MusicScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return BlocListener<AudioPlayerBloc, AudioPlayerState>(
       listener: _audioPlayerListener,
       child: Scaffold(
