@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/views/pallette.dart';
 
 class MusicItem extends StatelessWidget {
   final MusicModel musicModel;
@@ -22,7 +23,7 @@ class MusicItem extends StatelessWidget {
             padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(7.0),
+              borderRadius: Pallette.borderRadius,
               boxShadow: const [
                 BoxShadow(
                   color: Colors.grey,
@@ -35,7 +36,7 @@ class MusicItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(7.0),
+                  borderRadius: Pallette.borderRadius,
                   child: Image.memory(
                     musicModel.thumbnails,
                     width: 80.0,
@@ -73,7 +74,7 @@ class MusicItem extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => onTap(musicModel),
-                borderRadius: BorderRadius.circular(7.0),
+                borderRadius: Pallette.borderRadius,
               ),
             ),
           ),

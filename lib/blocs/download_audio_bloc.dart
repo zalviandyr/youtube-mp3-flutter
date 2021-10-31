@@ -5,14 +5,17 @@ import 'dart:io';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
 
 class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
+  final AppLocalization _localization = GetIt.I<AppLocalization>();
   final List<DownloadAudioModel> listDownloadAudio = [];
 
   DownloadAudioBloc() : super(DownloadAudioUninitialized()) {
@@ -157,7 +160,7 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
 
               // show snackbar
               showSnackbar(downloadAudioModel.title,
-                  title: 'Success download audio');
+                  title: _localization.translate('download_success'));
             },
             (logMessage) {
               log(logMessage.getMessage(), name: 'FFmpegKit');
@@ -172,7 +175,7 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
 
           // show snackbar
           showSnackbar(downloadAudioModel.title,
-              title: 'Failed download audio', isError: true);
+              title: _localization.translate('download_failed'), isError: true);
         } catch (err) {
           log(err.toString(), name: 'Exception - DownloadAudioBloc');
         }

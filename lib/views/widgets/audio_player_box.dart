@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:marquee/marquee.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/views/pallette.dart';
 
 class AudioPlayerBox extends StatelessWidget {
   final VoidCallback onPlayPause;
@@ -25,7 +26,7 @@ class AudioPlayerBox extends StatelessWidget {
         padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(7.0),
+          borderRadius: Pallette.borderRadius,
           boxShadow: const [
             BoxShadow(
               color: Colors.grey,

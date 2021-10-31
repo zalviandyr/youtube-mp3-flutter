@@ -1,0 +1,17 @@
+{
+    "app_name": "Youtube Mp3",
+    "home": "Home",
+    "music": "Music",
+    "more": "More",
+    "no": "No",
+    "yes": "Yes",
+    "ok": "Ok",
+    "download_progress": "Download progress",
+    "download_cancel": "Are your sure to want cancel it ?",
+    "download_error": "Video cannot be downloaded",
+    "download_mp3": "Download Mp3",
+    "download_success": "Success download audio",
+    "download_failed": "Failed download audio",
+    "duration": "Duration",
+    "size": "Size"
+}

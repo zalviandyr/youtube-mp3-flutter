@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
 
@@ -16,8 +18,10 @@ class _NavigationScreenState extends State<NavigationScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   final PageController _pageController = PageController();
+  final AppLocalization _localization = GetIt.I<AppLocalization>();
   final List<Widget> _screens = const [
     HomeScreen(),
+    MusicScreen(),
     MusicScreen(),
   ];
   late AnimationController _animationController;
@@ -142,18 +146,25 @@ class _NavigationScreenState extends State<NavigationScreen>
         currentIndex: _curIndex,
         onTap: _navAction,
         elevation: 20.0,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            label: 'Home',
-            icon: FaIcon(
+            label: _localization.translate('home'),
+            icon: const FaIcon(
               FontAwesomeIcons.home,
               size: 20.0,
             ),
           ),
           BottomNavigationBarItem(
-            label: 'Music',
-            icon: FaIcon(
+            label: _localization.translate('music'),
+            icon: const FaIcon(
               FontAwesomeIcons.music,
+              size: 20.0,
+            ),
+          ),
+          BottomNavigationBarItem(
+            label: _localization.translate('more'),
+            icon: const FaIcon(
+              FontAwesomeIcons.ellipsisH,
               size: 20.0,
             ),
           ),

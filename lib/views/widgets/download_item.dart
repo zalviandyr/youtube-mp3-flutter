@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/views/pallette.dart';
 
 class DownloadItem extends StatelessWidget {
   final DownloadAudioModel downloadAudioModel;
@@ -24,7 +25,7 @@ class DownloadItem extends StatelessWidget {
       height: 113.0,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(7.0),
+        borderRadius: Pallette.borderRadius,
         boxShadow: const [
           BoxShadow(
             color: Colors.grey,
@@ -46,7 +47,7 @@ class DownloadItem extends StatelessWidget {
                       fit: BoxFit.cover,
                       imageUrl: downloadAudioModel.thumbnails.maxResUrl,
                       imageBuilder: (context, imageProvider) => ClipRRect(
-                        borderRadius: BorderRadius.circular(7.0),
+                        borderRadius: Pallette.borderRadius,
                         child: Image(
                           image: imageProvider,
                           width: 100.0,
@@ -63,14 +64,14 @@ class DownloadItem extends StatelessWidget {
                             height: 90.0,
                             decoration: BoxDecoration(
                               color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(7.0),
+                              borderRadius: Pallette.borderRadius,
                             ),
                           ),
                         );
                       },
                       // handle when maxRes not available
                       errorWidget: (context, url, error) => ClipRRect(
-                        borderRadius: BorderRadius.circular(7.0),
+                        borderRadius: Pallette.borderRadius,
                         child: Image.network(
                           downloadAudioModel.thumbnails.mediumResUrl,
                           width: 100.0,
@@ -83,7 +84,7 @@ class DownloadItem extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.grey.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(7.0),
+                          borderRadius: Pallette.borderRadius,
                         ),
                         child: Center(
                           child: GestureDetector(

@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/views/pallette.dart';
 
 class AudioPlayerModal extends StatefulWidget {
   final BorderRadius borderRadius;
@@ -137,7 +138,7 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
                   MusicModel music = _audioState.musics[itemIndex];
 
                   return ClipRRect(
-                    borderRadius: BorderRadius.circular(7.0),
+                    borderRadius: Pallette.borderRadius,
                     child: Image.memory(
                       music.thumbnails,
                       width: 250.w,

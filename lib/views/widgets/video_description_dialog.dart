@@ -2,15 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/utils/utils.dart';
+import 'package:youtube_mp3/views/pallette.dart';
 
 class VideoDescriptionDialog extends StatelessWidget {
+  final AppLocalization _localization = GetIt.I<AppLocalization>();
   final DownloadAudioModel downloadAudioModel;
   final Function(DownloadAudioModel)? downloadAction;
   final bool showDownloadButton;
 
-  const VideoDescriptionDialog({
+  VideoDescriptionDialog({
     Key? key,
     required this.downloadAudioModel,
     required this.downloadAction,
@@ -21,7 +25,7 @@ class VideoDescriptionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(7.0),
+        borderRadius: Pallette.borderRadius,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
@@ -32,7 +36,7 @@ class VideoDescriptionDialog extends StatelessWidget {
               fit: BoxFit.cover,
               imageUrl: downloadAudioModel.thumbnails.maxResUrl,
               imageBuilder: (context, imageProvider) => ClipRRect(
-                borderRadius: BorderRadius.circular(7.0),
+                borderRadius: Pallette.borderRadius,
                 child: Image(
                   image: imageProvider,
                   width: 180.0,
@@ -48,13 +52,13 @@ class VideoDescriptionDialog extends StatelessWidget {
                   height: 110.0,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(7.0),
+                    borderRadius: Pallette.borderRadius,
                   ),
                 ),
               ),
               // handle when maxRes not available
               errorWidget: (context, url, error) => ClipRRect(
-                borderRadius: BorderRadius.circular(7.0),
+                borderRadius: Pallette.borderRadius,
                 child: Image.network(
                   downloadAudioModel.thumbnails.mediumResUrl,
                   width: 180.0,
@@ -73,9 +77,9 @@ class VideoDescriptionDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Expanded(
+                Expanded(
                   flex: 3,
-                  child: Text('Duration'),
+                  child: Text(_localization.translate('duration')),
                 ),
                 Expanded(
                   flex: 7,
@@ -87,9 +91,9 @@ class VideoDescriptionDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Expanded(
+                Expanded(
                   flex: 3,
-                  child: Text('Size'),
+                  child: Text(_localization.translate('size')),
                 ),
                 Expanded(
                   flex: 7,
@@ -107,10 +111,10 @@ class VideoDescriptionDialog extends StatelessWidget {
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    FaIcon(FontAwesomeIcons.arrowCircleDown, size: 20.0),
-                    SizedBox(width: 10.0),
-                    Text('Download Mp3'),
+                  children: [
+                    const FaIcon(FontAwesomeIcons.arrowCircleDown, size: 20.0),
+                    const SizedBox(width: 10.0),
+                    Text(_localization.translate('download_mp3')),
                   ],
                 ),
               )
