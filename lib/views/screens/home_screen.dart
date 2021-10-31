@@ -26,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void initState() {
-    print('home screen');
     _youtubeLinkBloc = BlocProvider.of<YoutubeLinkBloc>(context);
     _downloadAudioBloc = BlocProvider.of<DownloadAudioBloc>(context);
     _musicBloc = BlocProvider.of<MusicBloc>(context);
@@ -45,14 +44,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   bool get wantKeepAlive => true;
-
-  void _setListDownloadAudioModel() {
-    DownloadAudioState state = _downloadAudioBloc.state;
-    if (state is DownloadAudioProgress) {
-      _listDownloadAudioModel.clear();
-      _listDownloadAudioModel.addAll(state.listDownloadAudio);
-    }
-  }
 
   void _pasteAction() async {
     ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);

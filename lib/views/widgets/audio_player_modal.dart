@@ -33,7 +33,6 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
   late AnimationController _animationController;
   late Animation<double> _animation;
   late int _initialPage;
-  late double _initialOffset;
 
   @override
   void initState() {
@@ -44,7 +43,6 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
       _audioState = state;
 
       _initialPage = state.musics.indexWhere((elm) => elm == state.music);
-      _initialOffset = 10000.0 + _initialPage;
     }
 
     _animationController = AnimationController(
@@ -84,19 +82,15 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
     _animationController.forward().then((_) => _animationController.reverse());
   }
 
-  void _onCarouselPageChange(int index, CarouselPageChangedReason reason) {
-    double? offsetNextPrev = _carouselController.pageController.page;
+  void _onCarouselNext(CarouselPageChangedReason reason) {
+    if (reason == CarouselPageChangedReason.manual) {
+      _nextAction();
+    }
+  }
 
-    if (offsetNextPrev != null) {
-      if (reason == CarouselPageChangedReason.manual) {
-        if (_initialOffset > offsetNextPrev) {
-          _prevAction();
-        } else if (_initialOffset < offsetNextPrev) {
-          _nextAction();
-        }
-      }
-
-      _initialOffset = offsetNextPrev;
+  void _onCarouselPrev(CarouselPageChangedReason reason) {
+    if (reason == CarouselPageChangedReason.manual) {
+      _prevAction();
     }
   }
 
@@ -154,7 +148,8 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
                 },
                 options: CarouselOptions(
                   initialPage: _initialPage,
-                  onPageChanged: _onCarouselPageChange,
+                  onCarouselNext: _onCarouselNext,
+                  onCarouselPrev: _onCarouselPrev,
                 ),
               ),
               const SizedBox(height: 20.0),

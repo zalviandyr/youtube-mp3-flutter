@@ -75,6 +75,9 @@ class CarouselSliderState extends State<CarouselSlider>
   /// mode is related to why the page is being changed
   CarouselPageChangedReason mode = CarouselPageChangedReason.controller;
 
+  // initial offset
+  late double initialOffset;
+
   CarouselSliderState(this.carouselController);
 
   void changeMode(CarouselPageChangedReason _mode) {
@@ -117,6 +120,10 @@ class CarouselSliderState extends State<CarouselSlider>
       viewportFraction: options.viewportFraction,
       initialPage: carouselState!.realPage,
     );
+
+    initialOffset = getRealIndex(carouselState!.initialPage,
+            carouselState!.realPage, widget.itemCount)
+        .toDouble();
 
     carouselState!.pageController = pageController;
   }
@@ -257,6 +264,8 @@ class CarouselSliderState extends State<CarouselSlider>
 
   @override
   void dispose() {
+    pageController?.dispose();
+
     super.dispose();
     clearTimer();
   }
@@ -274,9 +283,24 @@ class CarouselSliderState extends State<CarouselSlider>
       onPageChanged: (int index) {
         int currentPage = getRealIndex(index + carouselState!.initialPage,
             carouselState!.realPage, widget.itemCount);
+        double offsetNextPrev = pageController!.page!;
+
         if (widget.options.onPageChanged != null) {
           widget.options.onPageChanged!(currentPage, mode);
         }
+
+        if (widget.options.onCarouselNext != null &&
+            initialOffset < offsetNextPrev) {
+          widget.options.onCarouselNext!(mode);
+        }
+
+        if (widget.options.onCarouselPrev != null &&
+            initialOffset > offsetNextPrev) {
+          widget.options.onCarouselPrev!(mode);
+        }
+
+        // re-set initialOffset
+        initialOffset = offsetNextPrev;
       },
       itemBuilder: (BuildContext context, int idx) {
         final int index = getRealIndex(idx + carouselState!.initialPage,

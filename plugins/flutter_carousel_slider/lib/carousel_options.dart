@@ -72,6 +72,12 @@ class CarouselOptions {
   /// Called whenever the carousel is scrolled
   final ValueChanged<double?>? onScrolled;
 
+  /// Called when next page
+  final Function(CarouselPageChangedReason reason)? onCarouselNext;
+
+  /// Called when prev page
+  final Function(CarouselPageChangedReason reason)? onCarouselPrev;
+
   /// How the carousel should respond to user input.
   ///
   /// For example, determines how the items continues to animate after the
@@ -129,6 +135,8 @@ class CarouselOptions {
     this.enlargeCenterPage = false,
     this.onPageChanged,
     this.onScrolled,
+    this.onCarouselNext,
+    this.onCarouselPrev,
     this.scrollPhysics,
     this.pageSnapping = true,
     this.scrollDirection: Axis.horizontal,

@@ -21,7 +21,6 @@ class _MusicScreenState extends State<MusicScreen>
 
   @override
   void initState() {
-    print('music screen');
     // bloc
     _musicBloc = BlocProvider.of<MusicBloc>(context);
     _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
