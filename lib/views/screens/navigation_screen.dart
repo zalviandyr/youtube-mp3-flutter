@@ -1,9 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get_it/get_it.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
-import 'package:youtube_mp3/utils/utils.dart';
+import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
 
@@ -18,10 +18,8 @@ class _NavigationScreenState extends State<NavigationScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   final PageController _pageController = PageController();
-  final AppLocalization _localization = GetIt.I<AppLocalization>();
   final List<Widget> _screens = const [
     HomeScreen(),
-    MusicScreen(),
     MusicScreen(),
   ];
   late AnimationController _animationController;
@@ -51,11 +49,15 @@ class _NavigationScreenState extends State<NavigationScreen>
   }
 
   void _navAction(int index) {
-    _pageController.animateToPage(
-      index,
-      curve: Curves.easeInOut,
-      duration: const Duration(milliseconds: 200),
-    );
+    if (index < 2) {
+      _pageController.animateToPage(
+        index,
+        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 200),
+      );
+    } else {
+      _key.currentState!.openEndDrawer();
+    }
   }
 
   void _playPauseAction() {
@@ -70,24 +72,35 @@ class _NavigationScreenState extends State<NavigationScreen>
   }
 
   void _showAudioPlayerAction() {
-    BorderRadius borderRadius = const BorderRadius.only(
-      topLeft: Radius.circular(10.0),
-      topRight: Radius.circular(10.0),
-    );
-
     showModalBottomSheet(
       context: context,
       constraints: const BoxConstraints(maxHeight: 550),
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: borderRadius,
+        borderRadius: Pallette.modalBorderRadius,
       ),
       builder: (context) {
         return AudioPlayerModal(
-          borderRadius: borderRadius,
+          borderRadius: Pallette.modalBorderRadius,
           playPauseAction: _playPauseAction,
         );
+      },
+    );
+  }
+
+  void _languageSettingAction() {
+    showModalBottomSheet(
+      context: context,
+      constraints:
+          const BoxConstraints(minHeight: 550, minWidth: double.infinity),
+      // backgroundColor: Colors.transparent,
+      // isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: Pallette.modalBorderRadius,
+      ),
+      builder: (context) {
+        return const LanguageModal();
       },
     );
   }
@@ -142,27 +155,31 @@ class _NavigationScreenState extends State<NavigationScreen>
           ),
         ],
       ),
+      endDrawer: AppDrawer(
+        onLanguageSetting: _languageSettingAction,
+      ),
+      endDrawerEnableOpenDragGesture: false,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _curIndex,
         onTap: _navAction,
         elevation: 20.0,
         items: [
           BottomNavigationBarItem(
-            label: _localization.translate('home'),
+            label: 'home'.tr(),
             icon: const FaIcon(
               FontAwesomeIcons.home,
               size: 20.0,
             ),
           ),
           BottomNavigationBarItem(
-            label: _localization.translate('music'),
+            label: 'music'.tr(),
             icon: const FaIcon(
               FontAwesomeIcons.music,
               size: 20.0,
             ),
           ),
           BottomNavigationBarItem(
-            label: _localization.translate('more'),
+            label: 'more'.tr(),
             icon: const FaIcon(
               FontAwesomeIcons.ellipsisH,
               size: 20.0,

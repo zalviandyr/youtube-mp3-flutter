@@ -1,13 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
-import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
 
@@ -23,7 +22,6 @@ class _HomeScreenState extends State<HomeScreen>
   final TextEditingController _linkController = TextEditingController();
   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey();
   final List<DownloadAudioModel> _listDownloadAudioModel = [];
-  final AppLocalization _localization = GetIt.I<AppLocalization>();
   late YoutubeLinkBloc _youtubeLinkBloc;
   late DownloadAudioBloc _downloadAudioBloc;
   late MusicBloc _musicBloc;
@@ -81,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen>
         shape: RoundedRectangleBorder(
           borderRadius: Pallette.borderRadius,
         ),
-        content: Text(_localization.translate('download_cancel')),
+        content: const Text('download_cancel').tr(),
         actions: [
           TextButton(
             onPressed: () {
@@ -90,12 +88,12 @@ class _HomeScreenState extends State<HomeScreen>
               _downloadAudioBloc.add(
                   DownloadAudioRemove(downloadAudioModel: downloadAudioModel));
             },
-            child: Text(_localization.translate('yes')),
+            child: const Text('yes').tr(),
           ),
           const SizedBox(width: 2.0),
           ElevatedButton(
             onPressed: () => Get.back(),
-            child: Text(_localization.translate('no')),
+            child: const Text('no').tr(),
           ),
         ],
       ),
@@ -121,11 +119,11 @@ class _HomeScreenState extends State<HomeScreen>
     if (state is YoutubeLinkError) {
       showAnimationDialog(
         dialog: AlertDialog(
-          content: Text(_localization.translate('download_error')),
+          content: const Text('download_error').tr(),
           actions: [
             ElevatedButton(
               onPressed: () => Get.back(),
-              child: Text(_localization.translate('ok')),
+              child: const Text('ok').tr(),
             ),
           ],
         ),
@@ -184,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: Padding(
                 padding:
                     const EdgeInsets.only(top: 22.0, left: 10.0, right: 10.0),
-                child: Text(_localization.translate('download_progress')),
+                child: const Text('download_progress').tr(),
               ),
             ),
             SliverAnimatedList(

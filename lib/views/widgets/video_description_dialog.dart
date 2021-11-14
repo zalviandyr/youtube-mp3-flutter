@@ -1,20 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:youtube_mp3/models/models.dart';
-import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 
 class VideoDescriptionDialog extends StatelessWidget {
-  final AppLocalization _localization = GetIt.I<AppLocalization>();
   final DownloadAudioModel downloadAudioModel;
   final Function(DownloadAudioModel)? downloadAction;
   final bool showDownloadButton;
 
-  VideoDescriptionDialog({
+  const VideoDescriptionDialog({
     Key? key,
     required this.downloadAudioModel,
     required this.downloadAction,
@@ -79,7 +77,7 @@ class VideoDescriptionDialog extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text(_localization.translate('duration')),
+                  child: const Text('duration').tr(),
                 ),
                 Expanded(
                   flex: 7,
@@ -93,7 +91,7 @@ class VideoDescriptionDialog extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text(_localization.translate('size')),
+                  child: const Text('size').tr(),
                 ),
                 Expanded(
                   flex: 7,
@@ -114,7 +112,7 @@ class VideoDescriptionDialog extends StatelessWidget {
                   children: [
                     const FaIcon(FontAwesomeIcons.arrowCircleDown, size: 20.0),
                     const SizedBox(width: 10.0),
-                    Text(_localization.translate('download_mp3')),
+                    const Text('download_mp3').tr(),
                   ],
                 ),
               )

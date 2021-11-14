@@ -6,4 +6,8 @@ class Pallette {
   static const Color secondaryColor = Color(0xFF98C1D9);
 
   static BorderRadius borderRadius = BorderRadius.circular(7.0);
+  static BorderRadius modalBorderRadius = const BorderRadius.only(
+    topLeft: Radius.circular(10.0),
+    topRight: Radius.circular(10.0),
+  );
 }

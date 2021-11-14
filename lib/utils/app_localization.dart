@@ -1,35 +1,20 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:youtube_mp3/models/models.dart';
 
 class AppLocalization {
-  static final String _countryCode = Platform.localeName.split('_')[0];
-  static AppLocalization? _appLocalization;
-  late Map<String, String> _languages;
+  // *To add new language just edit this line and add new .json file to assets/lang/json
+  static const List<LanguageModel> availableLanguages = [
+    LanguageModel(languageCode: 'en', title: 'English'),
+    LanguageModel(languageCode: 'id', title: 'Indonesia')
+  ];
 
-  AppLocalization._internal();
+  static String get pathLang => 'assets/json/lang';
 
-  static Future<AppLocalization> getInstance() async {
-    _appLocalization ??= AppLocalization._internal();
-
-    await _appLocalization!.setLanguages(_countryCode);
-
-    return _appLocalization!;
+  static Locale get fallbackLocale {
+    return Locale(availableLanguages[0].languageCode);
   }
 
-  Future<void> setLanguages(String countryCode) async {
-    String txt = '';
-    try {
-      txt = await rootBundle.loadString('assets/json/lang/$countryCode.json');
-    } catch (err) {
-      await rootBundle.loadString('assets/json/lang/en.json');
-    }
-
-    _languages = Map<String, String>.from(jsonDecode(txt));
-  }
-
-  String translate(String key) {
-    return _languages[key] ?? 'unset';
+  static List<Locale> get availableLocales {
+    return availableLanguages.map((e) => Locale(e.languageCode)).toList();
   }
 }

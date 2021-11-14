@@ -1,4 +1,5 @@
 export 'navigation_screen.dart';
+export 'splash_screen.dart';
 
 // navigation item
 export 'home_screen.dart';

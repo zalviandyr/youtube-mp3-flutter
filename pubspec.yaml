@@ -31,6 +31,7 @@ dependencies:
   carousel_slider:
     path: plugins/flutter_carousel_slider
   cupertino_icons: ^1.0.2
+  easy_localization: ^3.0.0
   equatable: ^2.0.3
   ffmpeg_kit_flutter_full: ^4.5.0
   flutter:

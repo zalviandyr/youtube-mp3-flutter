@@ -1,9 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/constants/string_const.dart';
+import 'package:youtube_mp3/utils/app_localization.dart';
 import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
@@ -12,13 +14,22 @@ import 'package:youtube_mp3/views/screens/screens.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await EasyLocalization.ensureInitialized();
   await DependencyInjection.setup();
 
-  runApp(MyApp());
+  runApp(EasyLocalization(
+    supportedLocales: AppLocalization.availableLocales,
+    path: AppLocalization.pathLang,
+    fallbackLocale: AppLocalization.fallbackLocale,
+    saveLocale: true,
+    useOnlyLangCode: true,
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  final AppLocalization _localization = GetIt.I<AppLocalization>();
+  final Future _futureSplash = Future.delayed(const Duration(seconds: 3));
+
   MyApp({Key? key}) : super(key: key);
 
   @override
@@ -32,7 +43,10 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (_) => AudioPlayerBloc()),
         ],
         child: GetMaterialApp(
-          title: _localization.translate('app_name'),
+          title: StringConst.appName,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
           theme: ThemeData(
             fontFamily: 'JosefinSans',
             scaffoldBackgroundColor: Pallette.scaffoldBackground,
@@ -41,6 +55,16 @@ class MyApp extends StatelessWidget {
               secondary: Pallette.secondaryColor,
             ),
             textTheme: TextTheme(
+              headline2: TextStyle(
+                fontSize: 60.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+              headline3: TextStyle(
+                fontSize: 48.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
               headline6: TextStyle(fontSize: 20.sp),
               // TextForm style
               subtitle1: TextStyle(fontSize: 16.sp),
@@ -67,7 +91,17 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
-          home: const NavigationScreen(),
+          // home: const NavigationScreen(),
+          home: FutureBuilder(
+            future: _futureSplash,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return const NavigationScreen();
+              }
+
+              return const SplashScreen();
+            },
+          ),
         ),
       ),
     );

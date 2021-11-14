@@ -6,9 +6,7 @@ class DependencyInjection {
 
   static Future<void> setup() async {
     AppSharedPreferences pref = await AppSharedPreferences.getInstance();
-    AppLocalization localization = await AppLocalization.getInstance();
 
     _getIt.registerLazySingleton<AppSharedPreferences>(() => pref);
-    _getIt.registerLazySingleton<AppLocalization>(() => localization);
   }
 }

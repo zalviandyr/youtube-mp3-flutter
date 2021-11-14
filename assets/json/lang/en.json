@@ -1,5 +1,4 @@
 {
-    "app_name": "Youtube Mp3",
     "home": "Home",
     "music": "Music",
     "more": "More",
@@ -13,5 +12,6 @@
     "download_success": "Success download audio",
     "download_failed": "Failed download audio",
     "duration": "Duration",
-    "size": "Size"
+    "size": "Size",
+    "language_setting": "Language Setting"
 }
