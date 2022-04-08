@@ -92,17 +92,22 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
 
   Future<void> _prevAction({bool animateCarousel = false}) async {
     if (_musicHelper.canNextPrev) {
-      // handle skip twice when user tap prev button
-      bool isFirstIndex = _musicHelper.index == 0;
+      // previous if duration below 5 second
+      Duration curDuration = await _musicHelper.player.currentPosition.first;
 
-      if (isFirstIndex) {
-        _initialPage = _musicHelper.musics.length - 1;
-      } else {
-        _initialPage--;
-      }
+      if (!animateCarousel || curDuration.inSeconds <= 5) {
+        // handle skip twice when user tap prev button
+        bool isFirstIndex = _musicHelper.index == 0;
 
-      if (animateCarousel) {
-        await _carouselController.previousPage();
+        if (isFirstIndex) {
+          _initialPage = _musicHelper.musics.length - 1;
+        } else {
+          _initialPage--;
+        }
+
+        if (animateCarousel) {
+          await _carouselController.previousPage();
+        }
       }
 
       await _musicHelper.prevAction();
