@@ -159,7 +159,7 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
             const SizedBox(height: 10.0),
             CarouselSlider.builder(
               carouselController: _carouselController,
-              itemCount: _musicHelper.musics.length,
+              itemCount: _musicHelper.player.playlist?.audios.length ?? 0,
               itemBuilder: (context, itemIndex, pageViewIndex) {
                 String? image = _musicHelper
                     .player.playlist?.audios[itemIndex].metas.image?.path;

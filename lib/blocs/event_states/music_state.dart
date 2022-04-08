@@ -26,5 +26,5 @@ class MusicInitialized extends MusicState {
   const MusicInitialized({required this.musics});
 
   @override
-  List<Object?> get props => [musics];
+  List<Object?> get props => [identityHashCode(this)];
 }

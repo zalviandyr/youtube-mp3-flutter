@@ -15,7 +15,6 @@ class MusicScreen extends StatefulWidget {
 
 class _MusicScreenState extends State<MusicScreen>
     with AutomaticKeepAliveClientMixin<MusicScreen> {
-  final TextEditingController _searchController = TextEditingController();
   final MusicHelper _musicHelper = MusicHelper.instance;
   late MusicBloc _musicBloc;
   double _paddingBottom = 10.0;
@@ -40,62 +39,64 @@ class _MusicScreenState extends State<MusicScreen>
   }
 
   @override
-  void dispose() {
-    _searchController.dispose();
-
-    super.dispose();
-  }
-
-  @override
   bool get wantKeepAlive => true;
 
-  void _searchAction(String value) {
-    FocusScope.of(context).unfocus();
+  void _onChangedSearch(String value) {
+    _musicBloc.add(MusicSearch(keyword: value));
   }
 
   void _musicAction(MusicModel music) {
     _musicHelper.playAtIndex(music);
   }
 
+  void _musicListener(BuildContext context, MusicState state) {
+    if (state is MusicInitialized) {
+      _musicHelper.initPlaylist(state.musics);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  top: kToolbarHeight, left: 10.0, right: 10.0),
-              child: _buildSearchBar(),
+    return BlocListener<MusicBloc, MusicState>(
+      listener: _musicListener,
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: kToolbarHeight, left: 10.0, right: 10.0),
+                child: _buildSearchBar(),
+              ),
             ),
-          ),
-          BlocBuilder<MusicBloc, MusicState>(
-            builder: (context, state) {
-              return SliverPadding(
-                padding: EdgeInsets.only(top: 10.0, bottom: _paddingBottom),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (state is MusicInitialized) {
-                        MusicModel music = state.musics[index];
-                        return MusicItem(
-                          musicModel: music,
-                          onTap: _musicAction,
-                        );
-                      }
+            BlocBuilder<MusicBloc, MusicState>(
+              builder: (context, state) {
+                return SliverPadding(
+                  padding: EdgeInsets.only(top: 10.0, bottom: _paddingBottom),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (state is MusicInitialized) {
+                          MusicModel music = state.musics[index];
+                          return MusicItem(
+                            musicModel: music,
+                            onTap: _musicAction,
+                          );
+                        }
 
-                      return const SizedBox.shrink();
-                    },
-                    childCount:
-                        state is MusicInitialized ? state.musics.length : 0,
+                        return const SizedBox.shrink();
+                      },
+                      childCount:
+                          state is MusicInitialized ? state.musics.length : 0,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -104,8 +105,7 @@ class _MusicScreenState extends State<MusicScreen>
     return SizedBox(
       height: 47.0,
       child: TextFormField(
-        controller: _searchController,
-        onFieldSubmitted: _searchAction,
+        onChanged: _onChangedSearch,
         decoration: const InputDecoration(
           prefixIcon: Padding(
             padding: EdgeInsets.all(12.0),

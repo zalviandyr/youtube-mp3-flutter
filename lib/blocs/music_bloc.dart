@@ -9,33 +9,46 @@ import 'package:youtube_mp3/helpers/string_helper.dart';
 import 'package:youtube_mp3/models/models.dart';
 
 class MusicBloc extends Bloc<MusicEvent, MusicState> {
+  final List<MusicModel> _musics = [];
+
   MusicBloc() : super(MusicUninitialized()) {
-    on<MusicFetch>((event, emit) async {
-      try {
-        emit(MusicLoading());
+    on<MusicFetch>(_onMusicFetch);
+    on<MusicSearch>(_onMusicSearch);
+  }
 
-        List<MusicModel> musics = [];
-        Directory dir = (await getExternalStorageDirectory())!;
-        for (FileSystemEntity file in dir.listSync()) {
-          File music = File(file.path);
-          Metadata metadata = await MetadataRetriever.fromFile(music);
-          int toSecond = metadata.trackDuration! ~/ 1000;
-          String minute = twoDigits(toSecond ~/ 60);
-          String second = twoDigits(toSecond.remainder(60));
+  Future<void> _onMusicFetch(MusicFetch event, Emitter<MusicState> emit) async {
+    try {
+      emit(MusicLoading());
 
-          musics.add(MusicModel(
-              thumbnails: metadata.albumArt!,
-              title: metadata.trackName!,
-              duration: minute + ':' + second,
-              path: file.path));
-        }
+      Directory dir = (await getExternalStorageDirectory())!;
 
-        emit(MusicInitialized(musics: musics));
-      } catch (err) {
-        log(err.toString(), name: 'MusicFetch');
+      for (FileSystemEntity file in dir.listSync()) {
+        File music = File(file.path);
+        Metadata metadata = await MetadataRetriever.fromFile(music);
+        int toSecond = metadata.trackDuration! ~/ 1000;
+        String minute = twoDigits(toSecond ~/ 60);
+        String second = twoDigits(toSecond.remainder(60));
 
-        emit(MusicError());
+        _musics.add(MusicModel(
+            thumbnails: metadata.albumArt!,
+            title: metadata.trackName!,
+            duration: minute + ':' + second,
+            path: file.path));
       }
-    });
+
+      emit(MusicInitialized(musics: _musics));
+    } catch (err) {
+      log(err.toString(), name: 'MusicFetch');
+
+      emit(MusicError());
+    }
+  }
+
+  Future<void> _onMusicSearch(
+      MusicSearch event, Emitter<MusicState> emit) async {
+    List<MusicModel> result = List.from(_musics.where((elm) =>
+        elm.title.toLowerCase().contains(event.keyword.toLowerCase())));
+
+    emit(MusicInitialized(musics: result));
   }
 }
