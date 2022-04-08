@@ -46,6 +46,17 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
 
     _initialPage = _musicHelper.index;
 
+    _musicHelper.player.current.listen((event) {
+      int? index = event?.index;
+      if (index != null) {
+        if (index != _initialPage) {
+          _carouselController.nextPage();
+        }
+
+        _initialPage = event!.index;
+      }
+    });
+
     super.initState();
   }
 
@@ -190,8 +201,14 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
 
                       return Column(
                         children: [
-                          LinearProgressIndicator(
+                          Slider(
                             value: progress,
+                            inactiveColor: Colors.white,
+                            onChanged: (value) {
+                              double duration = value * info.duration.inSeconds;
+                              _musicHelper.player
+                                  .seek(Duration(seconds: duration.toInt()));
+                            },
                           ),
                           const SizedBox(height: 10.0),
                           Row(

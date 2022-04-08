@@ -10,7 +10,6 @@ import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 
-// TODO: handle when music finish
 // TODO: add home screen tutorial
 // TODO: search action
 void main() async {

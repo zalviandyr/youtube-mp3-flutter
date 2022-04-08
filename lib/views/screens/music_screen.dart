@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -56,7 +54,6 @@ class _MusicScreenState extends State<MusicScreen>
   }
 
   void _musicAction(MusicModel music) {
-    log(music.title);
     _musicHelper.playAtIndex(music);
   }
 
