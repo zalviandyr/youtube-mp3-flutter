@@ -10,6 +10,7 @@ import 'package:youtube_mp3/models/models.dart';
 class MusicHelper {
   final AssetsAudioPlayer player;
   final List<File> musics = [];
+  bool canNextPrev = true;
   int _indexToPlay = 0;
 
   MusicHelper._internal() : player = AssetsAudioPlayer();
@@ -38,12 +39,42 @@ class MusicHelper {
 
     await player.open(
       playlist,
-      // showNotification: true,
+      showNotification: true,
       loopMode: LoopMode.playlist,
       autoStart: false,
+      notificationSettings: NotificationSettings(
+        stopEnabled: false,
+        customNextAction: (player) async {
+          await nextAction();
+        },
+        customPrevAction: (player) async {
+          await prevAction();
+        },
+      ),
     );
 
     await player.playlistPlayAtIndex(_indexToPlay);
+  }
+
+  Future<void> nextAction() async {
+    if (canNextPrev) {
+      canNextPrev = false;
+      await player.next();
+      canNextPrev = true;
+    }
+  }
+
+  Future<void> prevAction() async {
+    if (canNextPrev) {
+      canNextPrev = false;
+      if (index == 0) {
+        int lastIndex = musics.length - 1;
+        await player.playlistPlayAtIndex(lastIndex);
+      } else {
+        await player.previous();
+      }
+      canNextPrev = true;
+    }
   }
 
   Future<void> _initMetadata(Audio audio) async {

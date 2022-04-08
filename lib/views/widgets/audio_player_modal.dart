@@ -33,7 +33,6 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
   late AnimationController _animationController;
   late Animation<double> _animation;
   late int _initialPage;
-  bool _enable = true;
 
   @override
   void initState() {
@@ -46,16 +45,7 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
 
     _initialPage = _musicHelper.index;
 
-    _musicHelper.player.current.listen((event) {
-      int? index = event?.index;
-      if (index != null) {
-        if (index != _initialPage) {
-          _carouselController.nextPage();
-        }
-
-        _initialPage = event!.index;
-      }
-    });
+    _musicHelper.player.current.listen(_currentListen);
 
     super.initState();
   }
@@ -67,38 +57,58 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
     super.dispose();
   }
 
+  /// Handle carousel when audio finish or next
+  void _currentListen(Playing? playing) {
+    int index = _musicHelper.index;
+    if (index != _initialPage &&
+        _carouselController.pageController.positions.isNotEmpty) {
+      _carouselController.nextPage();
+    }
+
+    _initialPage = index;
+  }
+
   Future<void> _nextAction({bool animateCarousel = false}) async {
-    if (_enable) {
-      _enable = false;
+    if (_musicHelper.canNextPrev) {
+      // handle skip twice when user tap next button
+      bool isLastIndex = _musicHelper.index == _musicHelper.musics.length - 1;
+
+      if (isLastIndex) {
+        _initialPage = 0;
+      } else {
+        _initialPage++;
+      }
+
       if (animateCarousel) {
         await _carouselController.nextPage();
       }
 
-      await _musicHelper.player.next();
+      await _musicHelper.nextAction();
 
       await _animationController.forward();
       await _animationController.reverse();
-      _enable = true;
     }
   }
 
   Future<void> _prevAction({bool animateCarousel = false}) async {
-    if (_enable) {
-      _enable = false;
+    if (_musicHelper.canNextPrev) {
+      // handle skip twice when user tap prev button
+      bool isFirstIndex = _musicHelper.index == 0;
+
+      if (isFirstIndex) {
+        _initialPage = _musicHelper.musics.length - 1;
+      } else {
+        _initialPage--;
+      }
+
       if (animateCarousel) {
         await _carouselController.previousPage();
       }
 
-      if (_musicHelper.index == 0) {
-        int lastIndex = _musicHelper.musics.length - 1;
-        await _musicHelper.player.playlistPlayAtIndex(lastIndex);
-      } else {
-        await _musicHelper.player.previous();
-      }
+      await _musicHelper.prevAction();
 
       await _animationController.forward();
       await _animationController.reverse();
-      _enable = true;
     }
   }
 
