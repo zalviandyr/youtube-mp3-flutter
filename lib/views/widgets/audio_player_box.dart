@@ -1,20 +1,19 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:marquee/marquee.dart';
-import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/helpers/music_helper.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 
 class AudioPlayerBox extends StatelessWidget {
+  final MusicHelper _musicHelper = MusicHelper.instance;
   final VoidCallback onPlayPause;
   final VoidCallback onDetail;
-  final Stream<Map<String, dynamic>>? progress;
 
-  const AudioPlayerBox({
+  AudioPlayerBox({
     Key? key,
     required this.onPlayPause,
     required this.onDetail,
-    required this.progress,
   }) : super(key: key);
 
   @override
@@ -40,15 +39,14 @@ class AudioPlayerBox extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                  builder: (context, state) {
-                    return Expanded(
-                      child: SizedBox(
-                        height: 30.0,
-                        child: Marquee(
-                          text: state is AudioPlayerInitialized
-                              ? state.music.title
-                              : '',
+                Expanded(
+                  child: SizedBox(
+                    height: 30.0,
+                    child: PlayerBuilder.current(
+                      player: _musicHelper.player,
+                      builder: (context, playing) {
+                        return Marquee(
+                          text: playing.audio.audio.metas.title ?? '',
                           style: Theme.of(context)
                               .textTheme
                               .bodyText1!
@@ -57,38 +55,38 @@ class AudioPlayerBox extends StatelessWidget {
                           fadingEdgeStartFraction: 0.1,
                           fadingEdgeEndFraction: 0.1,
                           blankSpace: 30.0,
-                        ),
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 15.0),
                 GestureDetector(
                   onTap: onPlayPause,
-                  child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                  child: PlayerBuilder.playerState(
+                    player: _musicHelper.player,
                     builder: (context, state) {
-                      if (state is AudioPlayerInitialized) {
-                        return FaIcon(
-                          state.audioState == AudioStateEnum.playing
-                              ? FontAwesomeIcons.solidPauseCircle
-                              : FontAwesomeIcons.solidPlayCircle,
-                          size: 30.0,
-                          color: Colors.white,
-                        );
-                      }
-
-                      return const SizedBox.shrink();
+                      return FaIcon(
+                        state == PlayerState.play
+                            ? FontAwesomeIcons.solidPauseCircle
+                            : FontAwesomeIcons.solidPlayCircle,
+                        size: 30.0,
+                        color: Colors.white,
+                      );
                     },
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10.0),
-            StreamBuilder(
-              stream: progress,
-              builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+            PlayerBuilder.realtimePlayingInfos(
+              player: _musicHelper.player,
+              builder: (context, info) {
+                double progress = info.currentPosition.inSeconds /
+                    (info.current?.audio.duration.inSeconds ?? 0);
+
                 return LinearProgressIndicator(
-                  value: snapshot.data?['progress'],
+                  value: progress,
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   color: Colors.white,
                 );

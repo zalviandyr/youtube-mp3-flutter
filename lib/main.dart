@@ -10,12 +10,13 @@ import 'package:youtube_mp3/utils/utils.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 
+// TODO: handle when music finish
 // TODO: add home screen tutorial
+// TODO: search action
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await EasyLocalization.ensureInitialized();
-  await DependencyInjection.setup();
 
   runApp(EasyLocalization(
     supportedLocales: AppLocalization.availableLocales,
@@ -40,7 +41,6 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (_) => YoutubeLinkBloc()),
           BlocProvider(create: (_) => DownloadAudioBloc()),
           BlocProvider(create: (_) => MusicBloc()),
-          BlocProvider(create: (_) => AudioPlayerBloc()),
         ],
         child: GetMaterialApp(
           title: StringConst.appName,

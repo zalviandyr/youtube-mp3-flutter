@@ -1,8 +1,8 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:youtube_mp3/blocs/blocs.dart';
+import 'package:youtube_mp3/helpers/music_helper.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 import 'package:youtube_mp3/views/widgets/widgets.dart';
@@ -22,20 +22,24 @@ class _NavigationScreenState extends State<NavigationScreen>
     HomeScreen(),
     MusicScreen(),
   ];
+  final MusicHelper _musicHelper = MusicHelper.instance;
   late AnimationController _animationController;
-  late AudioPlayerBloc _audioPlayerBloc;
   int _curIndex = 0;
 
   @override
   void initState() {
-    // bloc
-    _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
-
     // animation
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
+
+    // player listener
+    _musicHelper.player.current.listen((playing) {
+      if (playing != null) {
+        _animationController.forward();
+      }
+    });
 
     super.initState();
   }
@@ -61,14 +65,7 @@ class _NavigationScreenState extends State<NavigationScreen>
   }
 
   void _playPauseAction() {
-    AudioPlayerState state = _audioPlayerBloc.state;
-    if (state is AudioPlayerInitialized) {
-      if (state.audioState == AudioStateEnum.playing) {
-        _audioPlayerBloc.add(AudioPlayerPause());
-      } else if (state.audioState == AudioStateEnum.pausing) {
-        _audioPlayerBloc.add(const AudioPlayerPlay());
-      }
-    }
+    _musicHelper.player.playOrPause();
   }
 
   void _showAudioPlayerAction() {
@@ -94,8 +91,6 @@ class _NavigationScreenState extends State<NavigationScreen>
       context: context,
       constraints:
           const BoxConstraints(minHeight: 550, minWidth: double.infinity),
-      // backgroundColor: Colors.transparent,
-      // isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: Pallette.modalBorderRadius,
       ),
@@ -103,12 +98,6 @@ class _NavigationScreenState extends State<NavigationScreen>
         return const LanguageModal();
       },
     );
-  }
-
-  void _audioPlayerListener(BuildContext context, AudioPlayerState state) {
-    if (state is AudioPlayerInitialized) {
-      _animationController.forward();
-    }
   }
 
   @override
@@ -126,10 +115,10 @@ class _NavigationScreenState extends State<NavigationScreen>
             left: 0.0,
             right: 0.0,
             bottom: 0.0,
-            child: BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
-              listener: _audioPlayerListener,
-              builder: (context, state) {
-                if (state is AudioPlayerInitialized) {
+            child: PlayerBuilder.realtimePlayingInfos(
+              player: _musicHelper.player,
+              builder: (context, info) {
+                if (info.current != null) {
                   return AnimatedBuilder(
                     animation: _animationController,
                     builder: (context, child) {
@@ -144,7 +133,6 @@ class _NavigationScreenState extends State<NavigationScreen>
                     child: AudioPlayerBox(
                       onPlayPause: _playPauseAction,
                       onDetail: _showAudioPlayerAction,
-                      progress: state.audioProgress,
                     ),
                   );
                 }

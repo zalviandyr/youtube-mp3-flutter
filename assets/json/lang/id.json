@@ -13,5 +13,6 @@
   "download_failed": "Gagal unduh audio",
   "duration": "Durasi",
   "size": "Ukuran",
-  "language_setting": "Pengaturan Bahasa"
+  "language_setting": "Pengaturan Bahasa",
+  "no_title": "Tidak Ada Judul"
 }

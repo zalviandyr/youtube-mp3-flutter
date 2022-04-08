@@ -1,14 +1,15 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
-import 'package:youtube_mp3/blocs/blocs.dart';
-import 'package:youtube_mp3/models/models.dart';
+import 'package:youtube_mp3/helpers/music_helper.dart';
+import 'package:youtube_mp3/helpers/string_helper.dart';
 import 'package:youtube_mp3/views/pallette.dart';
 
 class AudioPlayerModal extends StatefulWidget {
@@ -28,29 +29,22 @@ class AudioPlayerModal extends StatefulWidget {
 class _AudioPlayerModalState extends State<AudioPlayerModal>
     with SingleTickerProviderStateMixin {
   final CarouselController _carouselController = CarouselController();
-  late AudioPlayerBloc _audioPlayerBloc;
-  late AudioPlayerInitialized _audioState;
+  final MusicHelper _musicHelper = MusicHelper.instance;
   late AnimationController _animationController;
   late Animation<double> _animation;
   late int _initialPage;
+  bool _enable = true;
 
   @override
   void initState() {
-    _audioPlayerBloc = BlocProvider.of<AudioPlayerBloc>(context);
-
-    AudioPlayerState state = _audioPlayerBloc.state;
-    if (state is AudioPlayerInitialized) {
-      _audioState = state;
-
-      _initialPage = state.musics.indexWhere((elm) => elm == state.music);
-    }
-
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
     _animation =
         Tween<double>(begin: 1.0, end: 0.5).animate(_animationController);
+
+    _initialPage = _musicHelper.index;
 
     super.initState();
   }
@@ -62,194 +56,215 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
     super.dispose();
   }
 
-  void _nextAction({bool animateCarousel = false}) {
-    if (animateCarousel) {
-      _carouselController.nextPage();
+  Future<void> _nextAction({bool animateCarousel = false}) async {
+    if (_enable) {
+      _enable = false;
+      if (animateCarousel) {
+        await _carouselController.nextPage();
+      }
+
+      await _musicHelper.player.next();
+
+      await _animationController.forward();
+      await _animationController.reverse();
+      _enable = true;
     }
-
-    _audioPlayerBloc.add(AudioPlayerNext());
-
-    _animationController.forward().then((_) => _animationController.reverse());
   }
 
-  void _prevAction({bool animateCarousel = false}) {
-    if (animateCarousel) {
-      _carouselController.previousPage();
+  Future<void> _prevAction({bool animateCarousel = false}) async {
+    if (_enable) {
+      _enable = false;
+      if (animateCarousel) {
+        await _carouselController.previousPage();
+      }
+
+      if (_musicHelper.index == 0) {
+        int lastIndex = _musicHelper.musics.length - 1;
+        await _musicHelper.player.playlistPlayAtIndex(lastIndex);
+      } else {
+        await _musicHelper.player.previous();
+      }
+
+      await _animationController.forward();
+      await _animationController.reverse();
+      _enable = true;
     }
-
-    _audioPlayerBloc.add(AudioPlayerPrev());
-
-    _animationController.forward().then((_) => _animationController.reverse());
   }
 
-  void _onCarouselNext(CarouselPageChangedReason reason) {
+  Future<void> _onCarouselNext(CarouselPageChangedReason reason) async {
     if (reason == CarouselPageChangedReason.manual) {
-      _nextAction();
+      await _nextAction();
     }
   }
 
-  void _onCarouselPrev(CarouselPageChangedReason reason) {
+  Future<void> _onCarouselPrev(CarouselPageChangedReason reason) async {
     if (reason == CarouselPageChangedReason.manual) {
-      _prevAction();
-    }
-  }
-
-  void _audioListener(BuildContext context, AudioPlayerState state) {
-    if (state is AudioPlayerInitialized) {
-      setState(() => _audioState = state);
+      await _prevAction();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AudioPlayerBloc, AudioPlayerState>(
-      listener: _audioListener,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ..._buildBackground(),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Transform.rotate(
-                        angle: 1.5,
-                        child: const FaIcon(
-                          FontAwesomeIcons.angleRight,
-                          color: Colors.white,
-                        ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        ..._buildBackground(),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Transform.rotate(
+                      angle: 1.5,
+                      child: const FaIcon(
+                        FontAwesomeIcons.angleRight,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 10.0),
-              CarouselSlider.builder(
-                carouselController: _carouselController,
-                itemCount: _audioState.musics.length,
-                itemBuilder: (context, itemIndex, pageViewIndex) {
-                  MusicModel music = _audioState.musics[itemIndex];
+            ),
+            const SizedBox(height: 10.0),
+            CarouselSlider.builder(
+              carouselController: _carouselController,
+              itemCount: _musicHelper.musics.length,
+              itemBuilder: (context, itemIndex, pageViewIndex) {
+                String? image = _musicHelper
+                    .player.playlist?.audios[itemIndex].metas.image?.path;
 
-                  return ClipRRect(
-                    borderRadius: Pallette.borderRadius,
-                    child: Image.memory(
-                      music.thumbnails,
-                      width: 250.w,
-                      height: 250.0,
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                },
-                options: CarouselOptions(
-                  initialPage: _initialPage,
-                  onCarouselNext: _onCarouselNext,
-                  onCarouselPrev: _onCarouselPrev,
-                ),
+                return ClipRRect(
+                  borderRadius: Pallette.borderRadius,
+                  child: Image.file(
+                    File(image!),
+                    width: 250.w,
+                    height: 250.0,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+              options: CarouselOptions(
+                initialPage: _initialPage,
+                onCarouselNext: _onCarouselNext,
+                onCarouselPrev: _onCarouselPrev,
+                viewportFraction: 0.75,
+                enlargeCenterPage: true,
               ),
-              const SizedBox(height: 20.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 30.0,
-                      width: double.infinity,
-                      child: Marquee(
-                        text: _audioState.music.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline6!
-                            .copyWith(color: Colors.white),
-                        accelerationDuration: const Duration(seconds: 1),
-                        fadingEdgeStartFraction: 0.1,
-                        fadingEdgeEndFraction: 0.1,
-                        blankSpace: 30.0,
-                      ),
-                    ),
-                    const SizedBox(height: 30.0),
-                    StreamBuilder(
-                      stream: _audioState.audioProgress,
-                      builder: (context,
-                          AsyncSnapshot<Map<String, dynamic>> snapshot) {
-                        return Column(
-                          children: [
-                            LinearProgressIndicator(
-                              value: snapshot.data?['progress'],
-                            ),
-                            const SizedBox(height: 10.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  snapshot.data?['totDuration'] ?? '',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                                Text(
-                                  snapshot.data?['curDuration'] ?? '',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ],
+            ),
+            const SizedBox(height: 20.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 30.0,
+                    width: double.infinity,
+                    child: PlayerBuilder.current(
+                      player: _musicHelper.player,
+                      builder: (context, playing) {
+                        return Marquee(
+                          text: playing.audio.audio.metas.title ?? '',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyText1!
+                              .copyWith(color: Colors.white),
+                          accelerationDuration: const Duration(seconds: 1),
+                          fadingEdgeStartFraction: 0.1,
+                          fadingEdgeEndFraction: 0.1,
+                          blankSpace: 30.0,
                         );
                       },
                     ),
-                    const SizedBox(height: 30.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => _prevAction(animateCarousel: true),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            minimumSize: const Size(50, 50),
+                  ),
+                  const SizedBox(height: 30.0),
+                  PlayerBuilder.realtimePlayingInfos(
+                    player: _musicHelper.player,
+                    builder: (context, info) {
+                      double progress = info.currentPosition.inSeconds /
+                          info.duration.inSeconds;
+
+                      return Column(
+                        children: [
+                          LinearProgressIndicator(
+                            value: progress,
                           ),
-                          child: const FaIcon(
-                            FontAwesomeIcons.backward,
-                            color: Colors.white,
+                          const SizedBox(height: 10.0),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                durationToString(info.duration),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                durationToString(info.currentPosition),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
                           ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 30.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _prevAction(animateCarousel: true),
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          minimumSize: const Size(50, 50),
                         ),
-                        ElevatedButton(
-                          onPressed: widget.playPauseAction,
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.grey.withOpacity(.3),
-                            minimumSize: const Size(50, 50),
-                          ),
-                          child: FaIcon(
-                            _audioState.audioState == AudioStateEnum.playing
-                                ? FontAwesomeIcons.pause
-                                : FontAwesomeIcons.play,
-                            color: Colors.white,
-                          ),
+                        child: const FaIcon(
+                          FontAwesomeIcons.backward,
+                          color: Colors.white,
                         ),
-                        ElevatedButton(
-                          onPressed: () => _nextAction(animateCarousel: true),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            minimumSize: const Size(50, 50),
-                          ),
-                          child: const FaIcon(
-                            FontAwesomeIcons.forward,
-                            color: Colors.white,
-                          ),
+                      ),
+                      ElevatedButton(
+                        onPressed: widget.playPauseAction,
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.grey.withOpacity(.3),
+                          minimumSize: const Size(50, 50),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                        child: PlayerBuilder.realtimePlayingInfos(
+                          player: _musicHelper.player,
+                          builder: (context, info) {
+                            return FaIcon(
+                              info.isPlaying
+                                  ? FontAwesomeIcons.pause
+                                  : FontAwesomeIcons.play,
+                              color: Colors.white,
+                            );
+                          },
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _nextAction(animateCarousel: true),
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          minimumSize: const Size(50, 50),
+                        ),
+                        child: const FaIcon(
+                          FontAwesomeIcons.forward,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -260,15 +275,21 @@ class _AudioPlayerModalState extends State<AudioPlayerModal>
           borderRadius: widget.borderRadius,
           child: FadeTransition(
             opacity: _animation,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-              child: Image.memory(
-                _audioState.music.thumbnails,
-                fit: BoxFit.fitHeight,
-                color: Colors.grey.withOpacity(.3),
-                colorBlendMode: BlendMode.colorBurn,
-              ),
-            ),
+            child: PlayerBuilder.current(
+                player: _musicHelper.player,
+                builder: (context, playing) {
+                  String? image = playing.audio.audio.metas.image?.path;
+
+                  return ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                    child: Image.file(
+                      File(image!),
+                      fit: BoxFit.fitHeight,
+                      color: Colors.grey.withOpacity(.3),
+                      colorBlendMode: BlendMode.colorBurn,
+                    ),
+                  );
+                }),
           ),
         ),
       ),

@@ -13,5 +13,6 @@
     "download_failed": "Failed download audio",
     "duration": "Duration",
     "size": "Size",
-    "language_setting": "Language Setting"
+    "language_setting": "Language Setting",
+    "no_title": "No Title"
 }
