@@ -53,10 +53,6 @@ class _MusicScreenState extends State<MusicScreen>
 
   void _searchAction(String value) {
     FocusScope.of(context).unfocus();
-
-    if (value.isNotEmpty) {
-      print(value);
-    }
   }
 
   void _musicAction(MusicModel music) {
