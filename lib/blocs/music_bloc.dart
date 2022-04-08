@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/helpers/string_helper.dart';
 import 'package:youtube_mp3/models/models.dart';
@@ -37,7 +38,9 @@ class MusicBloc extends Bloc<MusicEvent, MusicState> {
       }
 
       emit(MusicInitialized(musics: _musics));
-    } catch (err) {
+    } catch (err, stackTrace) {
+      Sentry.captureException(err, stackTrace: stackTrace);
+
       log(err.toString(), name: 'MusicFetch');
 
       emit(MusicError());

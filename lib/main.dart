@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/constants/string_const.dart';
 import 'package:youtube_mp3/utils/app_localization.dart';
@@ -14,13 +15,13 @@ import 'package:youtube_mp3/views/pallette.dart';
 import 'package:youtube_mp3/views/screens/screens.dart';
 
 // TODO: add home screen tutorial
-// TODO: add sentry
-// TODO: search action
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
+
+    Sentry.captureException(details.exception, stackTrace: details.stack);
 
     if (kReleaseMode) {
       exit(1);
@@ -29,6 +30,20 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
 
+  if (kDebugMode) {
+    baseRunApp();
+  } else {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = StringConst.sentryDsn;
+        options.tracesSampleRate = 1.0;
+      },
+      appRunner: () => baseRunApp(),
+    );
+  }
+}
+
+void baseRunApp() {
   runApp(EasyLocalization(
     supportedLocales: AppLocalization.availableLocales,
     path: AppLocalization.pathLang,

@@ -3,22 +3,16 @@ import 'package:youtube_mp3/models/models.dart';
 
 abstract class YoutubeLinkState extends Equatable {
   const YoutubeLinkState();
-}
 
-class YoutubeLinkUninitialized extends YoutubeLinkState {
   @override
   List<Object?> get props => [];
 }
 
-class YoutubeLinkLoading extends YoutubeLinkState {
-  @override
-  List<Object?> get props => [];
-}
+class YoutubeLinkUninitialized extends YoutubeLinkState {}
 
-class YoutubeLinkError extends YoutubeLinkState {
-  @override
-  List<Object?> get props => [];
-}
+class YoutubeLinkLoading extends YoutubeLinkState {}
+
+class YoutubeLinkError extends YoutubeLinkState {}
 
 class YoutubeLinkSearchSuccess extends YoutubeLinkState {
   final DownloadAudioModel downloadAudioModel;

@@ -2,6 +2,9 @@ import 'package:equatable/equatable.dart';
 
 abstract class YoutubeLinkEvent extends Equatable {
   const YoutubeLinkEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class YoutubeLinkSearch extends YoutubeLinkEvent {

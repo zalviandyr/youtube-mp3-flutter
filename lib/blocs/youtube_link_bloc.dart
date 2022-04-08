@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/helpers/string_helper.dart';
@@ -8,34 +9,39 @@ import 'package:youtube_mp3/models/models.dart';
 
 class YoutubeLinkBloc extends Bloc<YoutubeLinkEvent, YoutubeLinkState> {
   YoutubeLinkBloc() : super(YoutubeLinkUninitialized()) {
-    on<YoutubeLinkSearch>((event, emit) async {
-      emit(YoutubeLinkLoading());
+    on<YoutubeLinkSearch>(_onYoutubeLinkSearch);
+  }
 
-      try {
-        YoutubeExplode yt = YoutubeExplode();
-        Video video = await yt.videos.get(event.link);
-        VideoId id = video.id;
+  Future<void> _onYoutubeLinkSearch(
+      YoutubeLinkSearch event, Emitter<YoutubeLinkState> emit) async {
+    emit(YoutubeLinkLoading());
 
-        // get video manifest
-        StreamManifest manifest = await yt.videos.streamsClient.getManifest(id);
-        AudioOnlyStreamInfo audio = manifest.audioOnly.withHighestBitrate();
+    try {
+      YoutubeExplode yt = YoutubeExplode();
+      Video video = await yt.videos.get(event.link);
+      VideoId id = video.id;
 
-        yt.close();
+      // get video manifest
+      StreamManifest manifest = await yt.videos.streamsClient.getManifest(id);
+      AudioOnlyStreamInfo audio = manifest.audioOnly.withHighestBitrate();
 
-        emit(YoutubeLinkSearchSuccess(
-          downloadAudioModel: DownloadAudioModel(
-            id: video.id.value,
-            thumbnails: video.thumbnails,
-            title: video.title,
-            duration: durationToString(video.duration!),
-            size: audio.size.totalMegaBytes.toStringAsFixed(2),
-          ),
-        ));
-      } catch (err) {
-        log(err.toString(), name: 'YoutubeLinkSearch');
+      yt.close();
 
-        emit(YoutubeLinkError());
-      }
-    });
+      emit(YoutubeLinkSearchSuccess(
+        downloadAudioModel: DownloadAudioModel(
+          id: video.id.value,
+          thumbnails: video.thumbnails,
+          title: video.title,
+          duration: durationToString(video.duration!),
+          size: audio.size.totalMegaBytes.toStringAsFixed(2),
+        ),
+      ));
+    } catch (err, stackTrace) {
+      Sentry.captureException(err, stackTrace: stackTrace);
+
+      log(err.toString(), name: 'YoutubeLinkSearch');
+
+      emit(YoutubeLinkError());
+    }
   }
 }

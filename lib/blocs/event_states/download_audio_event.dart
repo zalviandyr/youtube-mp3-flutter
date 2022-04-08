@@ -3,6 +3,9 @@ import 'package:youtube_mp3/models/models.dart';
 
 abstract class DownloadAudioEvent extends Equatable {
   const DownloadAudioEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class DownloadAudioSubmit extends DownloadAudioEvent {

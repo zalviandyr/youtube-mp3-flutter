@@ -3,22 +3,16 @@ import 'package:youtube_mp3/models/models.dart';
 
 abstract class MusicState extends Equatable {
   const MusicState();
-}
 
-class MusicUninitialized extends MusicState {
   @override
   List<Object?> get props => [];
 }
 
-class MusicLoading extends MusicState {
-  @override
-  List<Object?> get props => [];
-}
+class MusicUninitialized extends MusicState {}
 
-class MusicError extends MusicState {
-  @override
-  List<Object?> get props => [];
-}
+class MusicLoading extends MusicState {}
+
+class MusicError extends MusicState {}
 
 class MusicInitialized extends MusicState {
   final List<MusicModel> musics;

@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_mp3/blocs/blocs.dart';
 import 'package:youtube_mp3/models/models.dart';
@@ -17,74 +18,82 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
   final List<DownloadAudioModel> listDownloadAudio = [];
 
   DownloadAudioBloc() : super(DownloadAudioUninitialized()) {
-    on<DownloadAudioSubmit>((event, emit) async {
-      try {
-        // prevent duplicate item when insert into first list
-        bool isExist = false;
-        for (DownloadAudioModel item in listDownloadAudio) {
-          if (item == event.downloadAudioModel) {
-            isExist = true;
-            break;
-          }
+    on<DownloadAudioSubmit>(_onDownloadAudioSubmit);
+    on<DownloadAudioRemove>(_onDownloadAudioRemove);
+  }
+
+  Future<void> _onDownloadAudioSubmit(
+      DownloadAudioSubmit event, Emitter<DownloadAudioState> emit) async {
+    try {
+      // prevent duplicate item when insert into first list
+      bool isExist = false;
+      for (DownloadAudioModel item in listDownloadAudio) {
+        if (item == event.downloadAudioModel) {
+          isExist = true;
+          break;
         }
-
-        DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
-
-        if (!isExist) {
-          // insert to list
-          downloadAudioModel.downloadProgress =
-              _downloadProgress(downloadAudioModel, emit);
-
-          listDownloadAudio.add(downloadAudioModel);
-        }
-
-        int index =
-            listDownloadAudio.isEmpty ? 0 : listDownloadAudio.length - 1;
-
-        emit(DownloadAudioProgress(
-          listDownloadAudio: listDownloadAudio,
-          index: index,
-          insertElement: downloadAudioModel,
-          removeElement: null,
-        ));
-      } catch (err) {
-        log(err.toString(), name: 'DownloadAudioSubmit');
-
-        emit(DownloadAudioError());
       }
-    });
 
-    on<DownloadAudioRemove>((event, emit) async {
-      try {
-        DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
+      DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
 
-        String tempPath = (await getTemporaryDirectory()).path +
-            '/${downloadAudioModel.title}.mp3';
-        // delete temp file when user cancel download
-        File file = File(tempPath);
-        if (await file.exists()) {
-          await file.delete();
-        }
+      if (!isExist) {
+        // insert to list
+        downloadAudioModel.downloadProgress =
+            _downloadProgress(downloadAudioModel, emit);
 
-        // close stream
-        downloadAudioModel.downloadProgress!.close();
-
-        int index =
-            listDownloadAudio.indexWhere((elm) => elm == downloadAudioModel);
-        listDownloadAudio.removeAt(index);
-
-        emit(DownloadAudioProgress(
-          listDownloadAudio: listDownloadAudio,
-          index: index,
-          insertElement: null,
-          removeElement: downloadAudioModel,
-        ));
-      } catch (err) {
-        log(err.toString(), name: 'DownloadAudioCancel');
-
-        emit(DownloadAudioError());
+        listDownloadAudio.add(downloadAudioModel);
       }
-    });
+
+      int index = listDownloadAudio.isEmpty ? 0 : listDownloadAudio.length - 1;
+
+      emit(DownloadAudioProgress(
+        listDownloadAudio: listDownloadAudio,
+        index: index,
+        insertElement: downloadAudioModel,
+        removeElement: null,
+      ));
+    } catch (err, stackTrace) {
+      Sentry.captureException(err, stackTrace: stackTrace);
+
+      log(err.toString(), name: 'DownloadAudioSubmit');
+
+      emit(DownloadAudioError());
+    }
+  }
+
+  Future<void> _onDownloadAudioRemove(
+      DownloadAudioRemove event, Emitter<DownloadAudioState> emit) async {
+    try {
+      DownloadAudioModel downloadAudioModel = event.downloadAudioModel;
+
+      String tempPath = (await getTemporaryDirectory()).path +
+          '/${downloadAudioModel.title}.mp3';
+      // delete temp file when user cancel download
+      File file = File(tempPath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+
+      // close stream
+      downloadAudioModel.downloadProgress!.close();
+
+      int index =
+          listDownloadAudio.indexWhere((elm) => elm == downloadAudioModel);
+      listDownloadAudio.removeAt(index);
+
+      emit(DownloadAudioProgress(
+        listDownloadAudio: listDownloadAudio,
+        index: index,
+        insertElement: null,
+        removeElement: downloadAudioModel,
+      ));
+    } catch (err, stackTrace) {
+      Sentry.captureException(err, stackTrace: stackTrace);
+
+      log(err.toString(), name: 'DownloadAudioCancel');
+
+      emit(DownloadAudioError());
+    }
   }
 
   PublishSubject<double> _downloadProgress(
@@ -164,7 +173,9 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
               log(logMessage.getMessage(), name: 'FFmpegKit');
             },
           );
-        } on FatalFailureException catch (err) {
+        } on FatalFailureException catch (err, stackTrace) {
+          Sentry.captureException(err, stackTrace: stackTrace);
+
           // error when failed to retrieve download url
           log(err.message, name: 'FatalFailureException - DownloadAudioBloc');
 
@@ -174,7 +185,9 @@ class DownloadAudioBloc extends Bloc<DownloadAudioEvent, DownloadAudioState> {
           // show snackbar
           showSnackbar(downloadAudioModel.title,
               title: tr('download_failed'), isError: true);
-        } catch (err) {
+        } catch (err, stackTrace) {
+          Sentry.captureException(err, stackTrace: stackTrace);
+
           log(err.toString(), name: 'Exception - DownloadAudioBloc');
         }
       }
